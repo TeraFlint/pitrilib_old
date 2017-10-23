@@ -80,7 +80,8 @@ namespace Pitri
 	std::map<std::string, actionfunc> ImageEditor::GetActions()
 	{
 		std::map<std::string, actionfunc> actions;
-		actions["Resize"] = ImageEditor::Action_SampleDown;
+		actions["FillRect"] = ImageEditor::Action_FillRect;
+		actions["Resize"] = ImageEditor::Action_Resize;
 		actions["RoundCorners"] = ImageEditor::Action_RoundCorners;
 		return actions;
 	}
@@ -88,6 +89,19 @@ namespace Pitri
 	{
 		auto map = GetActions();
 		return map.find(key) != map.end();
+	}
+
+	ImageEditor::~ImageEditor()
+	{
+		unsigned size = layers.size();
+		for (unsigned i = 0; i < size; ++i)
+		{
+			if (layers[i] && ownership[i])
+			{
+				delete layers[i];
+				layers[i] = 0;
+			}
+		}
 	}
 
 	std::vector<Image *>::iterator ImageEditor::begin()
@@ -99,54 +113,99 @@ namespace Pitri
 		return layers.end();
 	}
 
-	bool ImageEditor::AddLayer(Image *img)
+	bool ImageEditor::_CreateLayer(const std::string &path)
 	{
-		if (!img) return false;
-		layers.push_back(img);
+		Image *img = new Image;
+		if (img->Load(path))
+			return _AddLayer(img, true);
+		return false;
+	}
+	bool ImageEditor::_CreateLayer(unsigned width, unsigned height, Color clr)
+	{
+		Image *img = new Image(width, height);
+		for (auto &px : *img)
+		{
+			px = clr;
+		}
+		return _AddLayer(img, true);
+	}
+	bool ImageEditor::_AddLayer(Image *img, bool new_operator)
+	{
+		//if (!img) return false;
+		unsigned index = layers.size();
+		layers.resize(index + 1);
+		layers[index] = img;
+		ownership.resize(index + 1);
+		ownership[index] = new_operator;
 		return true;
 	}
-	bool ImageEditor::RemoveLayer(const unsigned index, bool delete_ptr)
+	bool ImageEditor::_RemoveLayer(const unsigned index)
 	{
 		if (index >= layers.size()) return false;
-		if (delete_ptr && layers[index]) delete layers[index];
+		if (layers[index] && ownership[index])
+		{
+			delete layers[index];
+			layers[index] = 0;
+		}
 
 		layers.erase(layers.begin() + index);
+		ownership.erase(ownership.begin() + index);
 		return true;
 	}
-	bool ImageEditor::RemoveLayers(const unsigned begin, const unsigned end, bool delete_ptr)
+	bool ImageEditor::_RemoveLayers(const unsigned begin, const unsigned end)
 	{
 		unsigned a = begin, b = end;
 		if (!AdjustBorders(a, b))
 			return false;
 		if (a == b)
-			return RemoveLayer(a, delete_ptr);
+			return _RemoveLayer(a);
 
-		if (delete_ptr)
+		for (unsigned i = a; i < b; ++i)
 		{
-			for (unsigned i = a; i < b; ++i)
-			{
-				if (layers[i])
-					delete layers[i];
-			}
+			if (layers[i] && ownership[i])
+				delete layers[i];
 		}
 		layers.erase(layers.begin() + a, layers.begin() + b + 1);
+		ownership.erase(ownership.begin() + a, ownership.begin() + b + 1);
 		return true;
 	}
-	Image *ImageEditor::GetLayer(const unsigned index) const
+	bool ImageEditor::_ClearInvalidLayers()
 	{
+		bool success = false;
+		for (int i = layers.size() - 1; i >= 0; --i)
+		{
+			if (!layers[i])
+				success |= _RemoveLayer(i);
+		}
+		return success;
+	}
+
+	Image *ImageEditor::_GetLayer(const unsigned index) const
+	{
+		if (index == -1) return layers[layers.size() - 1];
 		if (index >= layers.size()) return 0;
 		return layers[index];
 	}
-	std::vector<Image *> ImageEditor::GetLayers() const
+	std::vector<Image *> ImageEditor::_GetLayers() const
 	{
 		return layers;
 	}
-
-	bool ImageEditor::MergeLayers(const bool remove, unsigned from, unsigned to)
+	unsigned ImageEditor::_GetLayerCount() const
 	{
-		if (!AdjustBorders(from, to))
+		return layers.size();
+	}
+
+	bool ImageEditor::_SwapLayers(unsigned from, unsigned to)
+	{
+		if (from >= layers.size() || to >= layers.size())
 			return false;
-		if (from == to)
+		Image *buffer = layers[to];
+		layers[to] = layers[from];
+		layers[to] = buffer;
+	}
+	bool ImageEditor::_MergeLayers(const bool remove, unsigned from, unsigned to)
+	{
+		if (!layers.size() || !AdjustBorders(from, to) || from == to)
 			return false;
 
 		unsigned width = 0, height = 0;
@@ -163,10 +222,13 @@ namespace Pitri
 
 		//overlay
 		Image img(width, height);
-		for (int i = to; i >= from; --i)
+		for (int i = to; i >= static_cast<int>(from); --i)
 		{
 			Image *layer = layers[i];
-			Color *from = &img.Pixel(0, 0), *to = &layer->Pixel(0, 0);
+			if (!layer) continue;
+
+			Color *to = &img.Pixel(0, 0), *from = &layer->Pixel(0, 0);
+
 			for (unsigned y = 0; y < layer->Height(); ++y)
 			{
 				for (unsigned x = 0; x < layer->Width(); ++x)
@@ -176,15 +238,31 @@ namespace Pitri
 				from += width - layer->Width();
 			}
 		}
+		if (!layers[from])
+		{
+			layers[from] = new Image(width, height);
+			ownership[from] = true;
+		}
 		*layers[from] = img;
 
 		if (remove)
+		{
+			for (unsigned i = from + 1; i < to; ++i)
+			{
+				if (layers[i] && ownership[i])
+				{
+					delete layers[i];
+					layers[i] = 0;
+				}
+			}
 			layers.erase(layers.begin() + from + 1, layers.begin() + to + 1);
+			ownership.erase(ownership.begin() + from + 1, ownership.begin() + to + 1);
+		}
 		return true;
 	}
-	bool ImageEditor::CollapseLayers(const bool remove)
+	bool ImageEditor::_CollapseLayers(const bool remove)
 	{
-		return MergeLayers(remove, 0, layers.size() - 1);
+		return _MergeLayers(remove, 0, layers.size() - 1);
 	}
 
 	bool ImageEditor::PerformLayerAction(const std::string &name, ImageAction &data, unsigned begin, unsigned end)
@@ -260,15 +338,133 @@ namespace Pitri
 
 	/* Resizing an image */
 
-	bool ImageEditor::SampleDown(Image &img, const unsigned width, const unsigned height, const bool percent)
+	bool ImageEditor::SubAction_SquashX(ImageAction &data, Image &img)
 	{
-		ImageAction action;
-		action.SetVal(0, width, percent);
-		action.SetVal(1, height, percent);
-		return Action_SampleDown(action, img);
+		if (!data.Valid(1)) return false;
+		unsigned width = data.GetVal(0, img.Width());
+		unsigned height = img.Height();
+
+		Image result(width, height);
+		Color *dst = &result.Pixel(0, 0), *src;
+		for (unsigned y = 0; y < height; ++y)
+		{
+			for (unsigned x = 0; x < width; ++x)
+			{
+				int r = 0, g = 0, b = 0, a = 0, pxs = 0;
+				float clrpxs = 0;
+
+				for (unsigned x2 = x*img.Width() / width; x2 < (x + 1)*img.Width() / width; ++x2)
+				{
+					src = &img.Pixel(x2, y);
+					pxs++;
+					a += src->a;
+					if (src->a)
+					{
+						r += src->r * src->a / 255;
+						g += src->g * src->a / 255;
+						b += src->b * src->a / 255;
+						clrpxs += (float)src->a / 255;
+					}
+				}
+				if (clrpxs)
+				{
+					dst->r = r / clrpxs;
+					dst->g = g / clrpxs;
+					dst->b = b / clrpxs;
+					dst->a = a / pxs;
+				}
+				++dst;
+			}
+		}
+		img = result;
+		return true;
 	}
-	bool ImageEditor::Action_SampleDown(ImageAction &data, Image &img)
+	bool ImageEditor::SubAction_SquashY(ImageAction &data, Image &img)
 	{
+		if (!data.Valid(2)) return false;
+		unsigned width = img.Width();
+		unsigned height = data.GetVal(1, img.Height());
+
+		Image result(width, height);
+		Color *dst = &result.Pixel(0, 0), *src;
+		for (unsigned y = 0; y < height; ++y)
+		{
+			for (unsigned x = 0; x < width; ++x)
+			{
+				int r = 0, g = 0, b = 0, a = 0, pxs = 0;
+				float clrpxs = 0;
+
+				for (unsigned y2 = y*img.Height() / width; y2 < (y + 1)*img.Height() / height; ++y2)
+				{
+					src = &img.Pixel(x, y2);
+					pxs++;
+					a += src->a;
+					if (src->a)
+					{
+						r += src->r * src->a / 255;
+						g += src->g * src->a / 255;
+						b += src->b * src->a / 255;
+						clrpxs += (float)src->a / 255;
+					}
+				}
+				if (clrpxs)
+				{
+					dst->r = r / clrpxs;
+					dst->g = g / clrpxs;
+					dst->b = b / clrpxs;
+					dst->a = a / pxs;
+				}
+				++dst;
+			}
+		}
+		img = result;
+		return true;
+	}
+	bool ImageEditor::SubAction_SquashXY(ImageAction &data, Image &img)
+	{
+		if (!data.Valid(2)) return false;
+		unsigned width = img.Width();
+		unsigned height = data.GetVal(1, img.Height());
+
+		Image result(width, height);
+		Color *dst = &result.Pixel(0, 0), *src;
+		for (unsigned y = 0; y < height; ++y)
+		{
+			for (unsigned x = 0; x < width; ++x)
+			{
+				int r = 0, g = 0, b = 0, a = 0, pxs = 0;
+				float clrpxs = 0;
+
+				for (unsigned y2 = y*img.Height() / width; y2 < (y + 1)*img.Height() / height; ++y2)
+				{
+					for (unsigned x2 = x*img.Width() / width; x2 < (x + 1)*img.Width() / width; ++x2)
+					{
+						src = &img.Pixel(x, y2);
+						pxs++;
+						a += src->a;
+						if (src->a)
+						{
+							r += src->r * src->a / 255;
+							g += src->g * src->a / 255;
+							b += src->b * src->a / 255;
+							clrpxs += (float)src->a / 255;
+						}
+					}
+				}
+				if (clrpxs)
+				{
+					dst->r = r / clrpxs;
+					dst->g = g / clrpxs;
+					dst->b = b / clrpxs;
+					dst->a = a / pxs;
+				}
+				++dst;
+			}
+		}
+		img = result;
+		return true;
+
+		/*
 		if (!data.Valid(1))
 			return false;
 
@@ -315,16 +511,122 @@ namespace Pitri
 					p.g = g / clrpxs;
 					p.b = b / clrpxs;
 					p.a = a / pxs;
-
-					/*r /= clrpxs;
-					g /= clrpxs;
-					b /= clrpxs;
-					a /= pxs;
-					p = Color(r, g, b, a);*/
 				}
 			}
 		}
 		img = result;
+		return true;
+		*/
+	}
+	bool ImageEditor::SubAction_StretchX(ImageAction &data, Image &img)
+	{
+		if (!data.Valid(1)) return false;
+		unsigned width = data.GetVal(0, img.Width());
+		unsigned height = img.Height();
+
+		/*Image result(width, height);
+		Color *dst = &result.Pixel(0, 0), *src;
+		for (unsigned y = 0; y < height; ++y)
+		{
+			for (unsigned x = 0; x < width; ++x)
+			{
+				//...
+				++dst;
+			}
+			//...
+		}
+		img = result;*/
+		return true;
+	}
+	bool ImageEditor::SubAction_StretchY(ImageAction &data, Image &img)
+	{
+		if (!data.Valid(2)) return false;
+		unsigned width = img.Width();
+		unsigned height = data.GetVal(1, img.Height());
+
+		/*Image result(width, height);
+		Color *dst = &result.Pixel(0, 0), *src;
+		for (unsigned y = 0; y < height; ++y)
+		{
+			for (unsigned x = 0; x < width; ++x)
+			{
+				//...
+				++dst;
+			}
+			//...
+		}
+		img = result;*/
+		return true;
+	}
+	bool ImageEditor::SubAction_StretchXY(ImageAction &data, Image &img)
+	{
+		if (!data.Valid(2)) return false;
+		unsigned width = img.Width();
+		unsigned height = data.GetVal(1, img.Height());
+
+		/*Image result(width, height);
+		Color *dst = &result.Pixel(0, 0), *src;
+		for (unsigned y = 0; y < height; ++y)
+		{
+			for (unsigned x = 0; x < width; ++x)
+			{
+				//...
+				++dst;
+			}
+			//...
+		}
+		img = result;*/
+		return true;
+	}
+
+	bool ImageEditor::Resize(Image &img, const unsigned width, const unsigned height, const bool percent)
+	{
+		ImageAction action;
+		action.SetVal(0, width, percent);
+		action.SetVal(1, height, percent);
+		return Action_Resize(action, img);
+	}
+	bool ImageEditor::Action_Resize(ImageAction &data, Image &img)
+	{
+		if (!data.Valid(1))
+			return false;
+
+		unsigned width = data.GetVal(0, img.Width());
+		unsigned height = data.GetVal(1, img.Height());
+
+		if (!width && !height)
+			return false;
+
+		if (!height)
+			height = img.Height() * width / img.Width();
+		if (!width)
+			width = img.Width() * height / img.Height();
+
+		int xdiff = width - img.Width(), ydiff = height - img.Height();
+		if (!xdiff && !ydiff) return false;
+
+		ImageAction newdata;
+		newdata.SetVal(0, width);
+		newdata.SetVal(1, height);
+
+		actionfunc func = 0;
+		if (xdiff < 0 && ydiff < 0)
+			func = SubAction_SquashXY;
+		else if (xdiff > 0 && ydiff > 0)
+			func = SubAction_StretchXY;
+		if (func) return func(newdata, img);
+
+		if (xdiff)
+		{
+			func = xdiff < 0 ? SubAction_SquashX : SubAction_StretchX;
+			func(newdata, img);
+		}
+
+		if (ydiff)
+		{
+			func = ydiff < 0 ? SubAction_SquashY : SubAction_StretchY;
+			func(newdata, img);
+		}
 		return true;
 	}
 
@@ -355,11 +657,36 @@ namespace Pitri
 		clr.b = data.GetVal(2);
 		clr.a = data.GetVal(3);
 
-		unsigned x = data.GetVal(4, img.Width());
-		unsigned y = data.GetVal(5, img.Height());
-		unsigned wdt = data.GetVal(6, img.Width());
-		unsigned hgt = data.GetVal(7, img.Height());
+		int xpos = data.GetVal(4, img.Width());
+		int ypos = data.GetVal(5, img.Height());
+		int wdt = data.GetVal(6, img.Width());
+		int hgt = data.GetVal(7, img.Height());
 
+		if (wdt < 0)
+		{
+			xpos += wdt;
+			wdt *= -1;
+		}
+		if (hgt < 0)
+		{
+			ypos += hgt;
+			hgt *= -1;
+		}
+
+		if (xpos < 0) xpos = 0;
+		if (ypos < 0) ypos = 0;
+		if (xpos + wdt >= img.Width()) wdt = img.Width() - xpos - 1;
+		if (ypos + hgt >= img.Height()) hgt = img.Height() - ypos - 1;
+
+		Color *px = &img.Pixel(xpos, ypos);
+		for (unsigned y = ypos; y < ypos + hgt; ++y)
+		{
+			for (unsigned x = xpos; x < xpos + wdt; ++x)
+			{
+				*px++ <<= clr;
+			}
+			px += img.Width() - wdt;
+		}
 		return true;
 	}
 

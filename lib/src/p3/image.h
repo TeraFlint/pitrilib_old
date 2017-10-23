@@ -42,6 +42,9 @@ namespace Pitri
 		Image(unsigned width, unsigned height);
 		~Image() = default;
 
+		std::vector<Color>::iterator begin();
+		std::vector<Color>::iterator end();
+
 		bool Save(const std::string &filename);
 		bool Load(const std::string &filename);
 

@@ -26,11 +26,14 @@ int main(int argc, char **argv)
 	par.ReturnValue("s", size);
 	const int limit = UCHAR_MAX / 3;
 
-	Pitri::Image img(size, size);
-	for (unsigned y = 0; y < img.Height(); ++y)
+	std::cout << "=== Stuff ===" << std::endl;
+
+	std::cout << "Creating circle.png... ";
+	Pitri::Image circle(size, size);
+	for (unsigned y = 0; y < circle.Height(); ++y)
 	{
 		const int dy = (static_cast<int>(y) - size / 2) * UCHAR_MAX / size;
-		for (unsigned x = 0; x < img.Width(); ++x)
+		for (unsigned x = 0; x < circle.Width(); ++x)
 		{
 			const int dx = (static_cast<int>(x) - size / 2) * UCHAR_MAX / size;
 
@@ -38,7 +41,7 @@ int main(int argc, char **argv)
 			int dir_b = limit + dy / 2 - dx;
 			int dir_c = limit - dy;
 
-			auto &px = img.Pixel(x, y);
+			auto &px = circle.Pixel(x, y);
 			px.r = dir_a > 0 ? dir_a : 0;
 			px.g = dir_b > 0 ? dir_b : 0;
 			px.b = dir_c > 0 ? dir_c : 0;
@@ -46,10 +49,23 @@ int main(int argc, char **argv)
 		}
 	}
 
-	Pitri::ImageEditor::RoundCorners(img, 50, true);
-
-	if(img.Save("result.png"))
+	Pitri::ImageEditor::RoundCorners(circle, 50, true);
+	if (circle.Save("circle.png"))
 		std::cout << "Success!" << std::endl;
+	else
+		std::cout << "Fail!" << std::endl;
+
+
+	for (unsigned i = 0; i < 4; ++i)
+	{
+		bool xgrow = i & 1, ygrow = i & 2;
+		Pitri::Image temp = circle;
+
+		Pitri::ImageEditor::Resize(temp, 80 + 40 * xgrow, 80 + 40 * ygrow, true);
+		std::string path = std::string("resize_") + (xgrow ? "+" : "-") + "x_" + (ygrow ? "+" : "-") + "y.png";
+		temp.Save(path);
+	}
+
 	std::cin.get();
 	return 0;
 }

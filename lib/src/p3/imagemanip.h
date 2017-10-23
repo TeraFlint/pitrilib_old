@@ -47,37 +47,48 @@ namespace Pitri
 	{
 		private: 
 			std::vector<Image *> layers;
+			std::vector<bool> ownership;
 
 		private:
 			bool AdjustBorders(unsigned &begin, unsigned &end) const;
 			static std::map<std::string, actionfunc> GetActions();
 			static bool HasAction(const std::string &key);
 
-			//static bool SubAction_RowsDown(ImageAction &data, Image &img);
-			//static bool SubAction_ColsDown(ImageAction &data, Image &img);
-			//static bool SubAction_RowsUp(ImageAction &data, Image &img);
-			//static bool SubAction_ColsUp(ImageAction &data, Image &img);
-
 			static bool Action_RoundCorners(ImageAction &data, Image &img);
-			static bool Action_SampleDown(ImageAction &data, Image &img);
 			//static bool Action_SampleUp(ImageAction &data, Image &img);
-			//static bool Action_Resize(ImageAction &data, Image &img);
+
+			static bool SubAction_SquashX(ImageAction &data, Image &img);
+			static bool SubAction_SquashY(ImageAction &data, Image &img);
+			static bool SubAction_SquashXY(ImageAction &data, Image &img);
+			static bool SubAction_StretchX(ImageAction &data, Image &img);
+			static bool SubAction_StretchY(ImageAction &data, Image &img);
+			static bool SubAction_StretchXY(ImageAction &data, Image &img);
+			static bool Action_Resize(ImageAction &data, Image &img);
 
 			static bool Action_FillRect(ImageAction &data, Image &img);
 
+
+
 		public:
+			~ImageEditor();
+
 			std::vector<Image *>::iterator begin();
 			std::vector<Image *>::iterator end();
 
-			bool AddLayer(Image *img);
-			bool RemoveLayer(const unsigned index, bool delete_ptr = false);
-			bool RemoveLayers(const unsigned begin, const unsigned end, bool delete_ptr = false);
-			Image *GetLayer(const unsigned index) const;
-			std::vector<Image *> GetLayers() const;
+			bool _CreateLayer(const std::string &path);
+			bool _CreateLayer(unsigned width, unsigned height, Color clr = Color());
+			bool _AddLayer(Image *img, bool new_operator = false);
+			bool _RemoveLayer(const unsigned index);
+			bool _RemoveLayers(const unsigned begin, const unsigned end);
+			bool _ClearInvalidLayers();
 
+			Image *_GetLayer(const unsigned index) const;
+			std::vector<Image *> _GetLayers() const;
+			unsigned _GetLayerCount() const;
 
-			bool MergeLayers(const bool remove, unsigned from, unsigned to);
-			bool CollapseLayers(const bool remove);
+			bool _SwapLayers(unsigned from, unsigned to);
+			bool _MergeLayers(const bool remove = true, unsigned from = 0, unsigned to = -1);
+			bool _CollapseLayers(const bool remove = true);
 
 			bool PerformLayerAction(const std::string &name, ImageAction &data, unsigned begin = 0, unsigned end = -1);
 			static bool PerformLayerAction(const std::string &name, ImageAction &data, Image &img);
@@ -88,12 +99,11 @@ namespace Pitri
 			- percent: Percentage values, if true. Values over 50% will be treated as 50%. */
 			static bool RoundCorners(Image &img, const unsigned radius, bool percent = false);
 
-			/*SampleDown() brings the image to a smaller size.
-			Please note, that the algorithm is only thought for size decrease.
+			/*Resize() grows, shrinks, stretches or squashes a image to fit the new measurements.
 			- img: Reference to the image.
 			- width: New width. If not set, it will be calculated from the height in order to sustain the original aspect ratio.
 			- height: New height. If not set, it will be calculated from the width.*/
-			static bool SampleDown(Image &img, const unsigned width, const unsigned height = 0, const bool percent = false);
+			static bool Resize(Image &img, const unsigned width, const unsigned height = 0, const bool percent = false);
 
 			/*FillRect() fills a rectangle of the image with the chosen color. Default is the whole image.
 			- img: Referenace to the image.

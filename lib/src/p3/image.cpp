@@ -37,13 +37,17 @@ namespace Pitri
 /* Overlay operator. Creates a new color by laying right on left. */
 Pitri::Color operator<<(Pitri::Color left, Pitri::Color right)
 {
+	if (right.a == 255) return right;
+
 	Pitri::Color result = left;
 	if (left.a || right.a)
 	{
-		result.r += (right.r - left.r) * right.a / 255;
-		result.g += (right.g - left.g) * right.a / 255;
-		result.b += (right.b - left.b) * right.a / 255;
-		result.a = 255 - ((255 - left.a)*(255 - right.a) / 255);
+		float sa = static_cast<float>(right.a) / 255, da = static_cast<float>(left.a) / 255;
+		for (unsigned char *dst = &result.r, *src = &right.r ; dst < &result.a; ++dst, ++src)
+		{
+			*dst = (*src * sa + *dst * da * (1-sa)) / (sa + da * (1-sa));
+		}
+		result.a = 255 * (1- (1 - da)*(1 - sa));
 	}
 	return result;
 }
@@ -75,6 +79,15 @@ namespace Pitri
 	{
 		error = 0;
 		bitmap.resize(width*height);
+	}
+
+	std::vector<Color>::iterator Image::begin()
+	{
+		return bitmap.begin();
+	}
+	std::vector<Color>::iterator Image::end()
+	{
+		return bitmap.end();
 	}
 
 	bool Image::Save(const std::string &filename)

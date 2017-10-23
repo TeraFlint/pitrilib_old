@@ -26,7 +26,7 @@ namespace Pitri
 			*smaller = size * (*smaller) / (*bigger);
 			*bigger = size;
 
-			ImageEditor::SampleDown(avatar, width, height);
+			ImageEditor::Resize(avatar, width, height);
 		}
 		//If it's not correct now, it's smaller.
 		if (avatar.Width() != size || avatar.Height() != size)

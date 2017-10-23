@@ -1,10 +1,29 @@
-﻿Der Buildvorgang wurde am 2017-10-23 08:21:28 gestartet.
+﻿Der Buildvorgang wurde am 2017-10-23 14:55:12 gestartet.
      1>Projekt "J:\C++\library\lib\lib.vcxproj" auf Knoten "2", Build Ziel(e).
      1>ClCompile:
-         C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\bin\CL.exe /c /ZI /nologo /W3 /WX- /sdl /Od /Oy- /Gm /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /Fo"Debug\\" /Fd"Debug\lib.pdb" /Gd /TP /analyze- /errorReport:prompt src\p3\parameters.cpp
-         parameters.cpp
-     1>j:\c++\library\lib\src\p3\parameters.cpp(172): warning C4244: "=": Konvertierung von "double" in "float", möglicher Datenverlust
-     1>j:\c++\library\lib\src\p3\parameters.cpp(224): warning C4018: "<": Konflikt zwischen "signed" und "unsigned"
+         C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\bin\CL.exe /c /ZI /nologo /W3 /WX- /sdl /Od /Oy- /Gm /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /Fo"Debug\\" /Fd"Debug\lib.pdb" /Gd /TP /analyze- /errorReport:prompt src\p3\imagemanip.cpp src\p3\userprofile.cpp
+         userprofile.cpp
+         imagemanip.cpp
+     1>j:\c++\library\lib\src\p3\imagemanip.cpp(309): warning C4018: ">": Konflikt zwischen "signed" und "unsigned"
+     1>j:\c++\library\lib\src\p3\imagemanip.cpp(312): warning C4018: "<": Konflikt zwischen "signed" und "unsigned"
+     1>j:\c++\library\lib\src\p3\imagemanip.cpp(314): warning C4018: "<": Konflikt zwischen "signed" und "unsigned"
+     1>j:\c++\library\lib\src\p3\imagemanip.cpp(316): warning C4244: "Initialisierung": Konvertierung von "double" in "float", möglicher Datenverlust
+     1>j:\c++\library\lib\src\p3\imagemanip.cpp(321): warning C4244: "=": Konvertierung von "float" in "unsigned char", möglicher Datenverlust
+     1>j:\c++\library\lib\src\p3\imagemanip.cpp(371): warning C4244: "=": Konvertierung von "float" in "unsigned char", möglicher Datenverlust
+     1>j:\c++\library\lib\src\p3\imagemanip.cpp(372): warning C4244: "=": Konvertierung von "float" in "unsigned char", möglicher Datenverlust
+     1>j:\c++\library\lib\src\p3\imagemanip.cpp(373): warning C4244: "=": Konvertierung von "float" in "unsigned char", möglicher Datenverlust
+     1>j:\c++\library\lib\src\p3\imagemanip.cpp(412): warning C4244: "=": Konvertierung von "float" in "unsigned char", möglicher Datenverlust
+     1>j:\c++\library\lib\src\p3\imagemanip.cpp(413): warning C4244: "=": Konvertierung von "float" in "unsigned char", möglicher Datenverlust
+     1>j:\c++\library\lib\src\p3\imagemanip.cpp(414): warning C4244: "=": Konvertierung von "float" in "unsigned char", möglicher Datenverlust
+     1>j:\c++\library\lib\src\p3\imagemanip.cpp(456): warning C4244: "=": Konvertierung von "float" in "unsigned char", möglicher Datenverlust
+     1>j:\c++\library\lib\src\p3\imagemanip.cpp(457): warning C4244: "=": Konvertierung von "float" in "unsigned char", möglicher Datenverlust
+     1>j:\c++\library\lib\src\p3\imagemanip.cpp(458): warning C4244: "=": Konvertierung von "float" in "unsigned char", möglicher Datenverlust
+     1>j:\c++\library\lib\src\p3\imagemanip.cpp(678): warning C4018: ">=": Konflikt zwischen "signed" und "unsigned"
+     1>j:\c++\library\lib\src\p3\imagemanip.cpp(679): warning C4018: ">=": Konflikt zwischen "signed" und "unsigned"
+     1>j:\c++\library\lib\src\p3\imagemanip.cpp(682): warning C4018: "<": Konflikt zwischen "signed" und "unsigned"
+     1>j:\c++\library\lib\src\p3\imagemanip.cpp(684): warning C4018: "<": Konflikt zwischen "signed" und "unsigned"
+         Code wird generiert...
+     1>j:\c++\library\lib\src\p3\imagemanip.cpp(205): warning C4715: "Pitri::ImageEditor::_SwapLayers": Nicht alle Steuerelementpfade geben einen Wert zurück.
        Lib:
          C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\bin\Lib.exe /OUT:"J:\C++\library\Debug\lib.lib" /NOLOGO Debug\filemanip.obj
          Debug\image.obj
@@ -17,4 +36,4 @@
 
 Der Buildvorgang wurde erfolgreich ausgeführt.
 
-Verstrichene Zeit 00:00:01.65
+Verstrichene Zeit 00:00:03.58
