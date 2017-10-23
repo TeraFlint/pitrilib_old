@@ -1,0 +1,38 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Express 14 for Windows Desktop
+VisualStudioVersion = 14.0.23107.0
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "lib-app", "lib-app\lib-app.vcxproj", "{8FF2AA8E-4562-4744-B191-2F4D495D25E5}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "lib", "lib\lib.vcxproj", "{37150294-E29E-47E8-90AF-A1EE5DB9142B}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|x64 = Debug|x64
+		Debug|x86 = Debug|x86
+		Release|x64 = Release|x64
+		Release|x86 = Release|x86
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{8FF2AA8E-4562-4744-B191-2F4D495D25E5}.Debug|x64.ActiveCfg = Debug|x64
+		{8FF2AA8E-4562-4744-B191-2F4D495D25E5}.Debug|x64.Build.0 = Debug|x64
+		{8FF2AA8E-4562-4744-B191-2F4D495D25E5}.Debug|x86.ActiveCfg = Debug|Win32
+		{8FF2AA8E-4562-4744-B191-2F4D495D25E5}.Debug|x86.Build.0 = Debug|Win32
+		{8FF2AA8E-4562-4744-B191-2F4D495D25E5}.Release|x64.ActiveCfg = Release|x64
+		{8FF2AA8E-4562-4744-B191-2F4D495D25E5}.Release|x64.Build.0 = Release|x64
+		{8FF2AA8E-4562-4744-B191-2F4D495D25E5}.Release|x86.ActiveCfg = Release|Win32
+		{8FF2AA8E-4562-4744-B191-2F4D495D25E5}.Release|x86.Build.0 = Release|Win32
+		{37150294-E29E-47E8-90AF-A1EE5DB9142B}.Debug|x64.ActiveCfg = Debug|x64
+		{37150294-E29E-47E8-90AF-A1EE5DB9142B}.Debug|x64.Build.0 = Debug|x64
+		{37150294-E29E-47E8-90AF-A1EE5DB9142B}.Debug|x86.ActiveCfg = Debug|Win32
+		{37150294-E29E-47E8-90AF-A1EE5DB9142B}.Debug|x86.Build.0 = Debug|Win32
+		{37150294-E29E-47E8-90AF-A1EE5DB9142B}.Release|x64.ActiveCfg = Release|x64
+		{37150294-E29E-47E8-90AF-A1EE5DB9142B}.Release|x64.Build.0 = Release|x64
+		{37150294-E29E-47E8-90AF-A1EE5DB9142B}.Release|x86.ActiveCfg = Release|Win32
+		{37150294-E29E-47E8-90AF-A1EE5DB9142B}.Release|x86.Build.0 = Release|Win32
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal

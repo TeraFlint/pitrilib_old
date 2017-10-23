@@ -1,0 +1,20 @@
+﻿Der Buildvorgang wurde am 2017-10-23 08:21:28 gestartet.
+     1>Projekt "J:\C++\library\lib\lib.vcxproj" auf Knoten "2", Build Ziel(e).
+     1>ClCompile:
+         C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\bin\CL.exe /c /ZI /nologo /W3 /WX- /sdl /Od /Oy- /Gm /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /Fo"Debug\\" /Fd"Debug\lib.pdb" /Gd /TP /analyze- /errorReport:prompt src\p3\parameters.cpp
+         parameters.cpp
+     1>j:\c++\library\lib\src\p3\parameters.cpp(172): warning C4244: "=": Konvertierung von "double" in "float", möglicher Datenverlust
+     1>j:\c++\library\lib\src\p3\parameters.cpp(224): warning C4018: "<": Konflikt zwischen "signed" und "unsigned"
+       Lib:
+         C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\bin\Lib.exe /OUT:"J:\C++\library\Debug\lib.lib" /NOLOGO Debug\filemanip.obj
+         Debug\image.obj
+         Debug\imagemanip.obj
+         Debug\parameters.obj
+         Debug\stringmanip.obj
+         Debug\userprofile.obj
+         lib.vcxproj -> J:\C++\library\Debug\lib.lib
+     1>Die Erstellung von Projekt "J:\C++\library\lib\lib.vcxproj" ist abgeschlossen (Build Ziel(e)).
+
+Der Buildvorgang wurde erfolgreich ausgeführt.
+
+Verstrichene Zeit 00:00:01.65
