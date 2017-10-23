@@ -394,7 +394,7 @@ namespace Pitri
 				int r = 0, g = 0, b = 0, a = 0, pxs = 0;
 				float clrpxs = 0;
 
-				for (unsigned y2 = y*img.Height() / width; y2 < (y + 1)*img.Height() / height; ++y2)
+				for (unsigned y2 = y*img.Height() / height; y2 < (y + 1)*img.Height() / height; ++y2)
 				{
 					src = &img.Pixel(x, y2);
 					pxs++;
@@ -423,7 +423,7 @@ namespace Pitri
 	bool ImageEditor::SubAction_SquashXY(ImageAction &data, Image &img)
 	{
 		if (!data.Valid(2)) return false;
-		unsigned width = img.Width();
+		unsigned width = data.GetVal(0, img.Width());
 		unsigned height = data.GetVal(1, img.Height());
 
 		Image result(width, height);
@@ -435,11 +435,11 @@ namespace Pitri
 				int r = 0, g = 0, b = 0, a = 0, pxs = 0;
 				float clrpxs = 0;
 
-				for (unsigned y2 = y*img.Height() / width; y2 < (y + 1)*img.Height() / height; ++y2)
+				for (unsigned y2 = y*img.Height() / height; y2 < (y + 1)*img.Height() / height; ++y2)
 				{
 					for (unsigned x2 = x*img.Width() / width; x2 < (x + 1)*img.Width() / width; ++x2)
 					{
-						src = &img.Pixel(x, y2);
+						src = &img.Pixel(x2, y2);
 						pxs++;
 						a += src->a;
 						if (src->a)

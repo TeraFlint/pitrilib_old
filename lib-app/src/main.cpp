@@ -19,7 +19,7 @@ int main(int argc, char **argv)
 	par.AddParameter("s", false, 1, "Size of the image. Default is " + std::to_string(size) + ".");
 	par.HandleParameters(argc, argv);
 
-	std::cout << par.PrintHelp(par.GetParameter("?!").used);
+	std::cout << par.PrintHelp(par.GetParameter("?!").used) << std::endl;
 	if (par.GetParameter("?").used || par.GetParameter("?!").used) 
 		return 0xF00; 
 
@@ -55,15 +55,17 @@ int main(int argc, char **argv)
 	else
 		std::cout << "Fail!" << std::endl;
 
-
+	std::cout << std::endl;
 	for (unsigned i = 0; i < 4; ++i)
 	{
 		bool xgrow = i & 1, ygrow = i & 2;
-		Pitri::Image temp = circle;
+		std::string label = std::string(xgrow ? "+" : "-") + "x_" + (ygrow ? "+" : "-") + "y";
+		std::cout << "Resizing circle: " << label << " -> ";
 
+		Pitri::Image temp = circle;
 		Pitri::ImageEditor::Resize(temp, 80 + 40 * xgrow, 80 + 40 * ygrow, true);
-		std::string path = std::string("resize_") + (xgrow ? "+" : "-") + "x_" + (ygrow ? "+" : "-") + "y.png";
-		temp.Save(path);
+		temp.Save("resize_" + label + ".png");
+		std::cout << "saved." << std::endl;
 	}
 
 	std::cin.get();

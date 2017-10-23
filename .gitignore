@@ -1,6 +1,5 @@
 # Prerequisites
 *.d
-*.opensdf
 
 # Compiled Object files
 *.slo
@@ -32,5 +31,17 @@
 *.out
 *.app
 
-#Results of the Executable
+# Visual Studio Files
+*.opensdf
+*.log
+*.tlog
+*.cache
+*.pdb
+*.idb
+
+# Directories
+**/Debug
+**/Release
+
+# Results of the Executable
 *.png
