@@ -82,7 +82,10 @@ namespace Pitri
 		std::map<std::string, actionfunc> actions;
 		actions["FillRect"] = ImageEditor::Action_FillRect;
 		actions["Resize"] = ImageEditor::Action_Resize;
+		actions["ResizeCanvas"] = ImageEditor::Action_ResizeCanvas;
 		actions["RoundCorners"] = ImageEditor::Action_RoundCorners;
+		actions["ShiftImage"] = ImageEditor::Action_ShiftImage;
+		actions["TileImage"] = ImageEditor::Action_TileImage;
 		return actions;
 	}
 	bool ImageEditor::HasAction(const std::string &key)
@@ -299,7 +302,7 @@ namespace Pitri
 		action.SetVal(0, radius, percent);
 		return Action_RoundCorners(action, img);
 	}
-	bool ImageEditor::Action_RoundCorners(ImageAction &data, Image &img)
+	bool ImageEditor::Action_RoundCorners(const ImageAction &data, Image &img)
 	{
 		if (!data.Valid(1))
 			return false;
@@ -336,9 +339,9 @@ namespace Pitri
 		return true;
 	}
 
-	/* Resizing an image */
+	/* Resizing and repositioning */
 
-	bool ImageEditor::SubAction_SquashX(ImageAction &data, Image &img)
+	bool ImageEditor::SubAction_SquashX(const ImageAction &data, Image &img)
 	{
 		if (!data.Valid(1)) return false;
 		unsigned width = data.GetVal(0, img.Width());
@@ -379,7 +382,7 @@ namespace Pitri
 		img = result;
 		return true;
 	}
-	bool ImageEditor::SubAction_SquashY(ImageAction &data, Image &img)
+	bool ImageEditor::SubAction_SquashY(const ImageAction &data, Image &img)
 	{
 		if (!data.Valid(2)) return false;
 		unsigned width = img.Width();
@@ -420,7 +423,7 @@ namespace Pitri
 		img = result;
 		return true;
 	}
-	bool ImageEditor::SubAction_SquashXY(ImageAction &data, Image &img)
+	bool ImageEditor::SubAction_SquashXY(const ImageAction &data, Image &img)
 	{
 		if (!data.Valid(2)) return false;
 		unsigned width = data.GetVal(0, img.Width());
@@ -518,7 +521,7 @@ namespace Pitri
 		return true;
 		*/
 	}
-	bool ImageEditor::SubAction_StretchX(ImageAction &data, Image &img)
+	bool ImageEditor::SubAction_StretchX(const ImageAction &data, Image &img)
 	{
 		if (!data.Valid(1)) return false;
 		unsigned width = data.GetVal(0, img.Width());
@@ -538,7 +541,7 @@ namespace Pitri
 		img = result;*/
 		return true;
 	}
-	bool ImageEditor::SubAction_StretchY(ImageAction &data, Image &img)
+	bool ImageEditor::SubAction_StretchY(const ImageAction &data, Image &img)
 	{
 		if (!data.Valid(2)) return false;
 		unsigned width = img.Width();
@@ -558,7 +561,7 @@ namespace Pitri
 		img = result;*/
 		return true;
 	}
-	bool ImageEditor::SubAction_StretchXY(ImageAction &data, Image &img)
+	bool ImageEditor::SubAction_StretchXY(const ImageAction &data, Image &img)
 	{
 		if (!data.Valid(2)) return false;
 		unsigned width = img.Width();
@@ -586,7 +589,7 @@ namespace Pitri
 		action.SetVal(1, height, percent);
 		return Action_Resize(action, img);
 	}
-	bool ImageEditor::Action_Resize(ImageAction &data, Image &img)
+	bool ImageEditor::Action_Resize(const ImageAction &data, Image &img)
 	{
 		if (!data.Valid(1))
 			return false;
@@ -630,6 +633,73 @@ namespace Pitri
 		return true;
 	}
 
+	bool ImageEditor::ResizeCanvas(Image &img, const unsigned width, const unsigned height, const int x, const int y, bool percent)
+	{
+		ImageAction action;
+		action.SetVal(0, width, percent);
+		action.SetVal(1, height, percent);
+		action.SetVal(2, x, percent);
+		action.SetVal(3, y, percent);
+		return Action_ResizeCanvas(action, img);
+	}
+	bool ImageEditor::Action_ResizeCanvas(const ImageAction &data, Image &img)
+	{
+		if (!data.Valid(2))
+			return false;
+
+		//...
+		return true;
+	}
+
+	bool ImageEditor::ShiftImage(Image &img, const int x, const int y, const bool percent)
+	{
+		ImageAction action;
+		action.SetVal(0, x, percent);
+		action.SetVal(1, y, percent);
+		return Action_ShiftImage(action, img);
+	}
+	bool ImageEditor::Action_ShiftImage(const ImageAction &data, Image &img)
+	{
+		if (!data.Valid(2)) return false;
+		int dx = data.GetVal(0, img.Width());
+		int dy = data.GetVal(1, img.Height());
+		if (!dx && !dy) return false;
+
+		Image result(img.Width(), img.Height());
+		if (abs(dx) < img.Width() && abs(dy) < img.Height())
+		{
+			unsigned wdt = img.Width() - abs(dx), hgt = img.Height() - abs(dy);
+			unsigned x1 = 0, x2 = img.Width(), y1 = 0, y2 = img.Height();
+			if (dx < 0)
+				x2 = wdt;
+			else if (dx > 0)
+				x1 = dx;
+			if (dy < 0)
+				y2 = hgt;
+			else if (dy > 0)
+				y1 = dy;
+
+			Color *src = &img.Pixel(0, 0);
+			if (dx < 0)
+				src += -dx;
+			if (dy < 0)
+				src += -dy * img.Width();
+
+			Color *dst = &result.Pixel(x1, y1);
+			for (unsigned y = y1; y < y2; ++y)
+			{
+				for (unsigned x = x1; x < x2; ++x)
+				{
+					*dst++ = *src++;
+				}
+				src += abs(dx);
+				dst += abs(dx);
+			}
+		}
+		img = result;
+		return true;
+	}
+
 	/* Filling forms */
 
 	bool ImageEditor::FillRect(Image &img, const Color &clr, const unsigned x, const unsigned y, const unsigned w, const unsigned h, const bool percent)
@@ -649,7 +719,7 @@ namespace Pitri
 		action.SetVal(7, hgt, percent);
 		return Action_FillRect(action, img);
 	}
-	bool ImageEditor::Action_FillRect(ImageAction &data, Image &img)
+	bool ImageEditor::Action_FillRect(const ImageAction &data, Image &img)
 	{
 		Color clr;
 		clr.r = data.GetVal(0);
@@ -690,57 +760,73 @@ namespace Pitri
 		return true;
 	}
 
+	/* Tiling the image */
 
-
-
-	void FillImage(Image &img, Color source)
+	bool ImageEditor::TileImage(Image &img, const Image &source, const bool overlay)
 	{
-		for (auto &c : img.bitmap)
-			c = source;
+		ImageAction action;
+		action.SetVal(0, reinterpret_cast<int>(&source));
+		action.SetVal(1, overlay);
+		return Action_TileImage(action, img);
 	}
-	void FillImage(Image &img, Image source)
+	bool ImageEditor::Action_TileImage(const ImageAction &data, Image &img)
 	{
-		unsigned width = img.Width(), height = img.Height();
-		for (unsigned y = 0; y < height; ++y)
+		Image *other = reinterpret_cast<Image*>(data.GetVal(0));
+		if (!other) return false;
+		bool overlay = data.GetVal(1);
+
+		Color *dst = &img.Pixel(0, 0);
+		for (unsigned y = 0; y < img.Height(); ++y)
 		{
-			for (unsigned x = 0; x < width; ++x)
+			Color *src = &other->Pixel(0, y % other->Height());
+			for (unsigned x = 0; x < img.Width(); ++x)
 			{
-				img.bitmap[y*width + x] = source.Pixel(x % source.Width(), y % source.Height());
+				if (!overlay)
+					*dst++ = *src++;
+				else
+					*dst++ <<= *src++;
+				if ((x + 1) % other->Width() == 0)
+					src -= other->Width();
 			}
 		}
+
+		return true;
 	}
 
-	void InvertColor(Color &clr, unsigned components)
+
+
+
+	/* Color functions */
+
+	bool ChangeColorLighting(Color &clr, const unsigned char light, const bool brighten)
 	{
-		if (components & 1)
-			clr.r = 255 - clr.r;
-		if (components & 2)
-			clr.g = 255 - clr.g;
-		if (components & 4)
-			clr.b = 255 - clr.b;
-		if (components & 8)
-			clr.a = 255 - clr.a;
+		if (brighten && light == 0 || !brighten && light == 255)
+			return false;
+
+		unsigned char *c = &clr.r;
+		for (unsigned i = 0; i < 3; ++i)
+		{
+			if (!brighten)
+				*c++ = *c * light / 255;
+			else
+			{
+				*c++ = 255 - (255 - light) * (255 - *c) / 255;
+			}
+		}
+		return true;
 	}
-
-	void MixColor(Color &base, Color other, unsigned char opacity)
+	bool ChangeColorLighting(Color &clr, float light)
 	{
-		if (!base.a && !other.a)
-			return;
+		if (!light) return false;
+		if (light < -1) light = -1;
+		else if (light > 1) light = 1;
 
-		base.r += (other.r - base.r) * opacity / 255;
-		base.g += (other.g - base.g) * opacity / 255;
-		base.b += (other.b - base.b) * opacity / 255;
-		base.a += (other.a - base.a) * opacity / 255;
-	}
-
-	void OverlayColor(Color &base, Color other)
-	{
-		if (!base.a && !other.a)
-			return;
-
-		base.r += (other.r - base.r) * other.a / 255;
-		base.g += (other.g - base.g) * other.a / 255;
-		base.b += (other.b - base.b) * other.a / 255;
-		base.a = 255 - ((255 - base.a)*(255 - other.a) / 255);
+		unsigned char *c = &clr.r;
+		for (unsigned i = 0; i < 3; ++i)
+		{
+			if (light < 0) *c++ *= light + 1;
+			else *c++ = 255 - (255 * (1 - light)) * (255 - *c) / 255;
+		}
+		return true;
 	}
 }

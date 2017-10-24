@@ -1,7 +1,11 @@
 #pragma optimize("gsy", on)
 
 #include "pitri.h"
-//using namespace pitri;
+
+namespace Pitri
+{
+
+}
 
 std::string Description()
 {
@@ -20,14 +24,13 @@ int main(int argc, char **argv)
 	par.HandleParameters(argc, argv);
 
 	std::cout << par.PrintHelp(par.GetParameter("?!").used) << std::endl;
-	if (par.GetParameter("?").used || par.GetParameter("?!").used) 
-		return 0xF00; 
+	if (par.GetParameter("?").used || par.GetParameter("?!").used)
+		return 0xF00;
 
 	par.ReturnValue("s", size);
 	const int limit = UCHAR_MAX / 3;
 
 	std::cout << "=== Stuff ===" << std::endl;
-
 	std::cout << "Creating circle.png... ";
 	Pitri::Image circle(size, size);
 	for (unsigned y = 0; y < circle.Height(); ++y)
@@ -51,23 +54,57 @@ int main(int argc, char **argv)
 
 	Pitri::ImageEditor::RoundCorners(circle, 50, true);
 	if (circle.Save("circle.png"))
-		std::cout << "Success!" << std::endl;
+		std::cout << "Success!";
 	else
-		std::cout << "Fail!" << std::endl;
+		std::cout << "Fail!";
+	std::cout << std::endl << std::endl;
 
-	std::cout << std::endl;
-	for (unsigned i = 0; i < 4; ++i)
+	std::vector<std::string> users = Pitri::GetUserList();
+	for (auto dirname : users)
 	{
-		bool xgrow = i & 1, ygrow = i & 2;
-		std::string label = std::string(xgrow ? "+" : "-") + "x_" + (ygrow ? "+" : "-") + "y";
-		std::cout << "Resizing circle: " << label << " -> ";
+		Pitri::UserProfile user(dirname);
+		if (user.Load())
+		{
+			std::string name = dirname;
+			auto userdata = user.GetKeyValue("name");
+			if (!userdata.contents.empty())
+				name = userdata.contents[0];
 
-		Pitri::Image temp = circle;
-		Pitri::ImageEditor::Resize(temp, 80 + 40 * xgrow, 80 + 40 * ygrow, true);
-		temp.Save("resize_" + label + ".png");
-		std::cout << "saved." << std::endl;
+			if (user.HasFlag())
+			{
+				std::cout << "Transforming flag of " << name << "... ";
+				Pitri::Image origin = user.GetFlag(), transform(size, size);
+				float factor = 1.2;
+				float frequency = 6.24, amplitude = 0.05;
+
+				unsigned frames = 20;
+
+				for (unsigned i = 0; i < frames; ++i)
+				{
+					Pitri::Color *px = &transform.Pixel(0, 0);
+					float phase = static_cast<float>(i) / frames;
+					for (int y = 0; y < transform.Height(); ++y)
+					{
+						for (int x = 0; x < transform.Width(); ++x)
+						{
+							float dx = (static_cast<float>(x) / size - 0.5) * factor, dy = (static_cast<float>(y) / size - 0.5) * factor;
+							float xpos = -amplitude * cos(frequency * dy);
+							float ypos = -amplitude * sin(frequency * (dx - phase)) * (dx / factor + 0.5);
+
+							//derivation of xpos
+							float light = 0.5 * (cos(frequency * (dx - phase)) + 1) * (dx / factor + 0.5) - 0.25;
+
+							Pitri::Color result = origin.InterpolatePixelColor(dx + xpos + 0.5, dy + ypos + 0.5);
+							Pitri::ChangeColorLighting(result, light);
+							*px++ = result;
+						}
+					}
+					transform.Save("frame-" + dirname + "-" +  std::to_string(i) + ".png");
+				}
+				std::cout << "Success!" << std::endl << std::endl;
+			}
+		}
 	}
-
 	std::cin.get();
 	return 0;
 }

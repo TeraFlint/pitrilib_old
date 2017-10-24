@@ -13,7 +13,10 @@ namespace Pitri
 	class UserProfile
 	{
 	private:
-		void AdjustPicture(std::string path, unsigned size);
+		bool AdjustImage(Image &img, const unsigned size, const bool centered);
+		bool AdjustAvatar(std::string path, unsigned size);
+		bool AdjustFlag(std::string path, unsigned size);
+		bool AdjustEmblem(std::string path, unsigned size);
 		std::string GetUserPath();
 
 		std::string userid;
@@ -34,8 +37,14 @@ namespace Pitri
 		std::vector<std::string> GetKeyList();
 		FileEntry GetKeyValue(std::string key);
 
-		bool HasPicture();
-		Image GetPicture();
+		bool HasAvatar() const;
+		Image GetAvatar() const;
+
+		bool HasFlag() const;
+		Image GetFlag() const;
+
+		bool HasEmblem() const;
+		Image GetEmblem() const;
 
 		std::string GetID();
 		void ChangeID(std::string id);
@@ -47,4 +56,7 @@ namespace Pitri
 
 	std::string GetAppDataPath();
 	std::string GetConfigPath(std::string file = "");
+
+	std::string GetDefaultUser();
+	std::vector<std::string> GetUserList();
 }

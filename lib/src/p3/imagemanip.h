@@ -41,7 +41,7 @@ namespace Pitri
 			std::string GetStr(unsigned index) const;
 	};
 
-	typedef bool(*actionfunc)(ImageAction &, Image &);
+	typedef bool(*actionfunc)(const ImageAction &, Image &);
 
 	class ImageEditor
 	{
@@ -54,20 +54,25 @@ namespace Pitri
 			static std::map<std::string, actionfunc> GetActions();
 			static bool HasAction(const std::string &key);
 
-			static bool Action_RoundCorners(ImageAction &data, Image &img);
-			//static bool Action_SampleUp(ImageAction &data, Image &img);
+			/* Actions and Sub Actions */
 
-			static bool SubAction_SquashX(ImageAction &data, Image &img);
-			static bool SubAction_SquashY(ImageAction &data, Image &img);
-			static bool SubAction_SquashXY(ImageAction &data, Image &img);
-			static bool SubAction_StretchX(ImageAction &data, Image &img);
-			static bool SubAction_StretchY(ImageAction &data, Image &img);
-			static bool SubAction_StretchXY(ImageAction &data, Image &img);
-			static bool Action_Resize(ImageAction &data, Image &img);
+			static bool Action_RoundCorners(const ImageAction &data, Image &img);
 
-			static bool Action_FillRect(ImageAction &data, Image &img);
+			static bool SubAction_SquashX(const ImageAction &data, Image &img);
+			static bool SubAction_SquashY(const ImageAction &data, Image &img);
+			static bool SubAction_SquashXY(const ImageAction &data, Image &img);
+			static bool SubAction_StretchX(const ImageAction &data, Image &img);
+			static bool SubAction_StretchY(const ImageAction &data, Image &img);
+			static bool SubAction_StretchXY(const ImageAction &data, Image &img);
+			static bool Action_Resize(const ImageAction &data, Image &img);
 
+			static bool Action_ResizeCanvas(const ImageAction &data, Image &img);
 
+			static bool Action_ShiftImage(const ImageAction &data, Image &img);
+
+			static bool Action_FillRect(const ImageAction &data, Image &img);
+
+			static bool Action_TileImage(const ImageAction &data, Image &img);
 
 		public:
 			~ImageEditor();
@@ -96,37 +101,45 @@ namespace Pitri
 			/*RoundCorners() searches for the corner pixels and makes them transparent.
 			- img: Reference to the image.
 			- radius: Radius of the corner circles.
-			- percent: Percentage values, if true. Values over 50% will be treated as 50%. */
+			- percent: Percentage values, if true. Values over 50% will be treated as 50%.*/
 			static bool RoundCorners(Image &img, const unsigned radius, bool percent = false);
 
-			/*Resize() grows, shrinks, stretches or squashes a image to fit the new measurements.
+			/*Resize() scales an image and its contents to fit the new measurements.
 			- img: Reference to the image.
 			- width: New width. If not set, it will be calculated from the height in order to sustain the original aspect ratio.
-			- height: New height. If not set, it will be calculated from the width.*/
+			- height: New height. If not set, it will be calculated from the width.
+			- percent: Percentage values, if true. */
 			static bool Resize(Image &img, const unsigned width, const unsigned height = 0, const bool percent = false);
 
+			/*ResizeCanvas() gives the Canvas a new size without resizing its contents.
+			- width, height: New image size.
+			- x, y: Relative new position. 0% = centered, +-100% = aligned on the border, if percentage is used.
+			- percent: Percentage values, if true.*/
+			static bool ResizeCanvas(Image &img, const unsigned width, const unsigned height, const int x, const int y, bool percent = false);
+
+			/*ShiftImage() Shifts the contents of the image.
+			- x: Relative horizontal difference.
+			- y: Relative vertical difference.
+			- percent: Percentage values, if true.*/
+			static bool ShiftImage(Image &img, const int x, const int y, const bool percent = false);
+
 			/*FillRect() fills a rectangle of the image with the chosen color. Default is the whole image.
-			- img: Referenace to the image.
+			- img: Reference to the image.
 			- clr: The chosen color.
 			- x, y: Top left position of the rectangle. 
-			- w, h: Width and height of the rectangle. (-1) for maximum size.*/
+			- w, h: Width and height of the rectangle. (-1) for maximum size.
+			- percent: Percentage values, if true.*/
 			static bool FillRect(Image &img, const Color &clr, const unsigned x = 0, const unsigned y = 0, const unsigned w = -1, const unsigned h = -1, bool percent = false);
+
+			/*TileImage() overwrites the whole image with the same texture. If the image is bigger than the source, the source will be looped.
+			- img: Reference to the image.
+			- source: Reference to the source image.
+			- overlay: If true, the source will be an overlay over the original file instead overwriting it.*/
+			static bool TileImage(Image &img, const Image &source, const bool overlay = false);
 	};
 
-	/*FillImage() overwrites the whole image with the same color.
-	- img: Reference to the image.
-	- source: Source color.*/
-	void FillImage(Image &img, Color source);
+	/* Color functions */
 
-	/*FillImage() overwrites the whole image with the same texture. If the image is bigger than the source, the source will be looped.
-	- img: Reference to the image.
-	- source: Source texture.*/
-	void FillImage(Image &img, Image source);
-
-	/*InvertColor() */
-	void InvertColor(Color &clr, unsigned components = 7);
-
-	void MixColor(Color &base, Color other, unsigned char opacity = 127);
-
-	void OverlayColor(Color &base, Color other);
+	bool ChangeColorLighting(Color &clr, const unsigned char light, const bool brighten);
+	bool ChangeColorLighting(Color &clr, float light);
 }

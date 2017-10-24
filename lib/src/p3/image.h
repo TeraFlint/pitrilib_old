@@ -36,6 +36,7 @@ namespace Pitri
 	private:
 		unsigned width, height;
 		unsigned error;
+		std::vector<Color> bitmap;
 
 	public:
 		Image() = default;
@@ -56,6 +57,8 @@ namespace Pitri
 		- x: X coordinate.
 		- y: Y coordinate.*/
 		Color &Pixel(unsigned x, unsigned y);
+		const Color &Pixel(unsigned x, unsigned y) const;
+
 		/*GetError() returns a non-zero value, if Save() or Load() failed.*/
 		unsigned GetError();
 
@@ -64,6 +67,10 @@ namespace Pitri
 		- y: Y coordinate.*/
 		bool Inside(const unsigned x, const unsigned y) const;
 
-		std::vector<Color> bitmap;
+		/*InterpolatePixelColor() gives bilinear interpolation for floaty coordinates. Returns an empty color, if out of borders.
+		- x: Precise x coordinate.
+		- y: Precose y coordinate.
+		- relative: If true, coordinates go from 0 to 1.*/
+		Color InterpolatePixelColor(float x, float y, const bool relative = true) const;
 	};
 }

@@ -11,9 +11,10 @@ namespace Pitri
 		valid_avatar = false;
 	}
 
-	void UserProfile::AdjustPicture(std::string path, unsigned size)
+	bool UserProfile::AdjustImage(Image &img, const unsigned size, const bool centered)
 	{
-		unsigned width = avatar.Width(), height = avatar.Height();
+		bool success = false;
+		unsigned width = img.Width(), height = img.Height();
 		//Too big? Scale it down.
 		if (max(width, height) > size)
 		{
@@ -25,27 +26,60 @@ namespace Pitri
 			}
 			*smaller = size * (*smaller) / (*bigger);
 			*bigger = size;
+			success |=  ImageEditor::Resize(img, width, height);
+		}
 
-			ImageEditor::Resize(avatar, width, height);
-		}
 		//If it's not correct now, it's smaller.
-		if (avatar.Width() != size || avatar.Height() != size)
+		if (centered && (img.Width() != size || img.Height() != size))
 		{
-			Image square(size, size);
-			unsigned xoff = (square.Width() - avatar.Width()) / 2, yoff = (square.Height() - avatar.Height()) / 2;
-			for (unsigned y = 0; y < avatar.Height(); ++y)
-				for (unsigned x = 0; x < avatar.Width(); ++x)
-					square.Pixel(x + xoff, y + yoff) = avatar.Pixel(x, y);
-			avatar = square;
+			int x = 0, y = 0;
+			if (!centered)
+				x = y = -100;
+			success |= ImageEditor::ResizeCanvas(img, size, size, x, y, true);
 		}
-		avatar.Save(path + "\\icon.png");
+		return success;
+
+		/*
+		if (img.Width() != size || img.Height() != size)
+		{
+			Image square_img(size, size);
+			unsigned xoff = (square_img.Width() - img.Width()) / 2, yoff = (square_img.Height() - img.Height()) / 2;
+			for (unsigned y = 0; y < img.Height(); ++y)
+				for (unsigned x = 0; x < img.Width(); ++x)
+					square_img.Pixel(x + xoff, y + yoff) = img.Pixel(x, y);
+			img = square_img;
+			success = true;
+		}
+		return success;
+		*/
+	}
+
+	bool UserProfile::AdjustAvatar(std::string path, unsigned size)
+	{
+		if (AdjustImage(avatar, size, true))
+			if (avatar.Save(path + "\\icon.png"))
+				return true;
+		return false;
+	}
+
+	bool UserProfile::AdjustFlag(std::string path, unsigned size)
+	{
+		if (AdjustImage(flag, size, false))
+			if (flag.Save(path + "\\flag.png"))
+				return true;
+		return false;
+	}
+	bool UserProfile::AdjustEmblem(std::string path, unsigned size)
+	{
+		if (AdjustImage(emblem, size, true))
+			if(emblem.Save(path + "\\emblem.png"))
+				return true;
+		return false;
 	}
 
 	std::string UserProfile::GetUserPath()
 	{
-		if (!userid.size())
-			return "";
-
+		if (!userid.size()) return "";
 		return GetConfigPath("users\\" + userid);
 	}
 
@@ -62,8 +96,23 @@ namespace Pitri
 			valid_avatar = true;
 			unsigned size = USER_PROFILE_PICTURE_SIZE;
 			if (avatar.Width() != size || avatar.Height() != size)
-				AdjustPicture(path, size);
+				AdjustAvatar(path, size);
 		}
+		if (flag.Load(path + "\\flag.png"))
+		{
+			valid_flag = true;
+			unsigned size = USER_PROFILE_PICTURE_SIZE;
+			if (flag.Width() != size || flag.Height() != size)
+				AdjustFlag(path, size);
+		}
+		if (emblem.Load(path + "\\emblem.png"))
+		{
+			valid_emblem = true;
+			unsigned size = USER_PROFILE_PICTURE_SIZE;
+			if (emblem.Width() != size || emblem.Height() != size)
+				AdjustEmblem(path, size);
+		}
+
 
 		initialized = true;
 		return true;
@@ -122,8 +171,15 @@ namespace Pitri
 	}
 
 
-	bool UserProfile::HasPicture() { return valid_avatar; }
-	Image UserProfile::GetPicture() { return avatar; }
+	bool UserProfile::HasAvatar() const { return valid_avatar; }
+	Image UserProfile::GetAvatar() const { return avatar; }
+
+	bool UserProfile::HasFlag() const { return valid_flag; }
+	Image UserProfile::GetFlag() const { return flag; }
+
+	bool UserProfile::HasEmblem() const { return valid_emblem; }
+	Image UserProfile::GetEmblem() const { return emblem; }
+
 
 	std::string UserProfile::GetID() { return userid; }
 	void UserProfile::ChangeID(std::string id) { userid = id; }
@@ -163,7 +219,11 @@ namespace Pitri
 		if (!CONFIG_PATH.empty())
 			return CONFIG_PATH + file;
 
+#if defined(P3_CONFIG_DIR)
+		std::string folder = P3_CONFIG_DIR;
+#else
 		std::string folder = "pitrisoftware";
+#endif
 		std::string result = GetSimpleFileValue("configpath", "path");
 		if (!result.empty())
 		{
@@ -179,5 +239,24 @@ namespace Pitri
 			return result + file;
 		}
 		return "";
+	}
+
+	std::string GetDefaultUser()
+	{
+		return GetSimpleFileValue(GetConfigPath("users\\defaultuser"), "default");
+	}
+	
+	std::vector<std::string> GetUserList()
+	{
+		std::vector<std::string> result;
+		std::string path = GetConfigPath("users");
+		auto entries = ScanDirectory(path, DT_DIR);
+		for (auto entry : entries)
+		{
+			std::ifstream file(path + "\\" + entry + "\\core");
+			if (file.good())
+				result.push_back(entry);
+		}
+		return result;
 	}
 }

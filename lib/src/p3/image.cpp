@@ -246,6 +246,10 @@ namespace Pitri
 	{
 		return bitmap[y*width + x];
 	}
+	const Color &Image::Pixel(unsigned x, unsigned y) const
+	{
+		return bitmap[y*width + x];
+	}
 
 	unsigned Image::GetError()
 	{
@@ -254,9 +258,66 @@ namespace Pitri
 
 	bool Image::Inside(const unsigned x, const unsigned y) const
 	{
-		//No need to check, if x or y are positive. They're unsigned.
-		//So, if someone plugs negative values in, they will underflow and be way bigger than the image dimensions.
 		return x < width && y < height;
+	}
+
+	Color Image::InterpolatePixelColor(float x, float y, const bool relative) const
+	{
+		Color empty(0, 0, 0, 0);
+		if (!width || !height)
+			return empty;
+		if (relative)
+		{
+			x *= (width-1);
+			y *= (height-1);
+		}
+
+		int xgrid = static_cast<int>(x + 2) - 2, ygrid = static_cast<int>(y + 2) - 2;
+		float xoff = x - xgrid, yoff = y - ygrid;
+
+		int x1 = xgrid, x2 = xgrid + 1;
+		int y1 = ygrid, y2 = ygrid + 1;
+		if (xgrid == x) x2 = xgrid;
+		if (ygrid == y) y2 = ygrid;
+
+		Color clr1 = empty, clr2 = empty, clr3 = empty, clr4 = empty;
+		if (Inside(x1, y1)) clr1 = Pixel(x1, y1);
+		if (Inside(x2, y1)) clr2 = Pixel(x2, y1);
+		if (Inside(x1, y2)) clr3 = Pixel(x1, y2);
+		if (Inside(x2, y2)) clr4 = Pixel(x2, y2);
+
+		Color top, btm, result;
+
+		//top merge
+		if (!clr1.a) clr1 = Color(clr2.r, clr2.g, clr2.b, 0);
+		if (!clr2.a) clr2 = Color(clr1.r, clr1.g, clr1.b, 0);
+		for (unsigned i = 0; i < 4; ++i)
+		{
+			unsigned char *c1 = &clr1.r + i, *c2 = &clr2.r + i, *dst = &top.r + i;
+			*dst = (1 - xoff) * (*c1) + (xoff)* (*c2);
+		}
+
+		//bottom merge
+		if (!clr3.a) clr3 = Color(clr4.r, clr4.g, clr4.b, 0);
+		if (!clr4.a) clr4 = Color(clr3.r, clr3.g, clr3.b, 0);
+		for (unsigned i = 0; i < 4; ++i)
+		{
+			unsigned char *c1 = &clr3.r + i, *c2 = &clr4.r + i, *dst = &btm.r + i;
+			*dst = (1 - xoff) * (*c1) + (xoff)* (*c2);
+		}
+
+		//main merge
+		if (!top.a) top = Color(btm.r, btm.g, btm.b, 0);
+		if (!btm.a) btm = Color(top.r, top.g, top.b, 0);
+		for (unsigned i = 0; i < 4; ++i)
+		{
+			unsigned char *c1 = &top.r + i, *c2 = &btm.r + i, *dst = &result.r + i;
+			*dst = (1 - yoff) * (*c1) + (yoff)* (*c2);
+		}
+		return result;
+
+		//Without alpha correction:
+		//*dst = (1 - yoff) * ((1 - xoff) * (*c1) + (xoff)* (*c2)) + (yoff)* ((1 - xoff) * (*c3) + (xoff)* (*c4));
 	}
 
 	/*Initialize helper for the WIC library.
