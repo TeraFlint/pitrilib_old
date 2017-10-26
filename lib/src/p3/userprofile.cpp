@@ -34,24 +34,10 @@ namespace Pitri
 		{
 			int x = 0, y = 0;
 			if (!centered)
-				x = y = -100;
+				x = -100;
 			success |= ImageEditor::ResizeCanvas(img, size, size, x, y, true);
 		}
 		return success;
-
-		/*
-		if (img.Width() != size || img.Height() != size)
-		{
-			Image square_img(size, size);
-			unsigned xoff = (square_img.Width() - img.Width()) / 2, yoff = (square_img.Height() - img.Height()) / 2;
-			for (unsigned y = 0; y < img.Height(); ++y)
-				for (unsigned x = 0; x < img.Width(); ++x)
-					square_img.Pixel(x + xoff, y + yoff) = img.Pixel(x, y);
-			img = square_img;
-			success = true;
-		}
-		return success;
-		*/
 	}
 
 	bool UserProfile::AdjustAvatar(std::string path, unsigned size)

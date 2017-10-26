@@ -1,4 +1,5 @@
 #pragma once
+#include "helpers.h"
 #include <string>
 #include <vector>
 #include <iostream> //for the operator
@@ -67,10 +68,28 @@ namespace Pitri
 		- y: Y coordinate.*/
 		bool Inside(const unsigned x, const unsigned y) const;
 
+		/*GetContentArea() returns the smallest rectangle that contains all the visible content.
+		The vector contains { x, y, width, height } or nothing, if nothing is visible.*/
+		std::vector<unsigned> GetContentArea() const;
+
+		/*GetContentArea() gives you the smallest rectangle that contains all the visible content.
+		Returns false and does not change the values, if nothing is visible.
+		- x, y: Coordinates, references.
+		- w, h: Rectangle size, references.*/
+		bool GetContentArea(unsigned &xpos, unsigned &ypos, unsigned &width, unsigned &height) const;
+
 		/*InterpolatePixelColor() gives bilinear interpolation for floaty coordinates. Returns an empty color, if out of borders.
 		- x: Precise x coordinate.
 		- y: Precose y coordinate.
 		- relative: If true, coordinates go from 0 to 1.*/
 		Color InterpolatePixelColor(float x, float y, const bool relative = true) const;
 	};
+
+	/* Color functions */
+
+	bool ChangeColorLighting(Color &clr, const unsigned char light, const bool brighten);
+	bool ChangeColorLighting(Color &clr, float light);
+
+	Color ColorTransition(Color a, Color b, const unsigned char progress = 127);
+	Color ColorTransition(Color a, Color b, float progress = 0.5);
 }

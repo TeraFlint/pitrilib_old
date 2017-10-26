@@ -120,6 +120,7 @@
   <ItemGroup>
     <ClInclude Include="src\p3\compointer.h" />
     <ClInclude Include="src\p3\filemanip.h" />
+    <ClInclude Include="src\p3\helpers.h" />
     <ClInclude Include="src\p3\image.h" />
     <ClInclude Include="src\p3\imagemanip.h" />
     <ClInclude Include="src\p3\parameters.h" />
@@ -130,6 +131,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\p3\filemanip.cpp" />
+    <ClCompile Include="src\p3\helpers.cpp" />
     <ClCompile Include="src\p3\image.cpp" />
     <ClCompile Include="src\p3\imagemanip.cpp" />
     <ClCompile Include="src\p3\parameters.cpp" />

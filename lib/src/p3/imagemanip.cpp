@@ -3,6 +3,8 @@
 
 namespace Pitri
 {
+	/*-- Image Action --*/
+
 	bool ImageAction::Valid(unsigned value_count, unsigned prec_count, unsigned string_count) const
 	{
 		return value_count <= values.size() 
@@ -62,7 +64,9 @@ namespace Pitri
 		return strings[index];
 	}
 
-	bool ImageEditor::AdjustBorders(unsigned &begin, unsigned &end) const
+	/*-- ImageEditorBase --*/
+
+	bool ImageEditorBase::AdjustBorders(unsigned &begin, unsigned &end) const
 	{
 		if (begin > end)
 		{
@@ -77,24 +81,7 @@ namespace Pitri
 		return true;
 	}
 
-	std::map<std::string, actionfunc> ImageEditor::GetActions()
-	{
-		std::map<std::string, actionfunc> actions;
-		actions["FillRect"] = ImageEditor::Action_FillRect;
-		actions["Resize"] = ImageEditor::Action_Resize;
-		actions["ResizeCanvas"] = ImageEditor::Action_ResizeCanvas;
-		actions["RoundCorners"] = ImageEditor::Action_RoundCorners;
-		actions["ShiftImage"] = ImageEditor::Action_ShiftImage;
-		actions["TileImage"] = ImageEditor::Action_TileImage;
-		return actions;
-	}
-	bool ImageEditor::HasAction(const std::string &key)
-	{
-		auto map = GetActions();
-		return map.find(key) != map.end();
-	}
-
-	ImageEditor::~ImageEditor()
+	ImageEditorBase::~ImageEditorBase()
 	{
 		unsigned size = layers.size();
 		for (unsigned i = 0; i < size; ++i)
@@ -107,23 +94,23 @@ namespace Pitri
 		}
 	}
 
-	std::vector<Image *>::iterator ImageEditor::begin()
+	std::vector<Image *>::iterator ImageEditorBase::begin()
 	{
 		return layers.begin();
 	}
-	std::vector<Image *>::iterator ImageEditor::end()
+	std::vector<Image *>::iterator ImageEditorBase::end()
 	{
 		return layers.end();
 	}
 
-	bool ImageEditor::_CreateLayer(const std::string &path)
+	bool ImageEditorBase::_CreateLayer(const std::string &path)
 	{
 		Image *img = new Image;
 		if (img->Load(path))
 			return _AddLayer(img, true);
 		return false;
 	}
-	bool ImageEditor::_CreateLayer(unsigned width, unsigned height, Color clr)
+	bool ImageEditorBase::_CreateLayer(unsigned width, unsigned height, Color clr)
 	{
 		Image *img = new Image(width, height);
 		for (auto &px : *img)
@@ -132,7 +119,7 @@ namespace Pitri
 		}
 		return _AddLayer(img, true);
 	}
-	bool ImageEditor::_AddLayer(Image *img, bool new_operator)
+	bool ImageEditorBase::_AddLayer(Image *img, bool new_operator)
 	{
 		//if (!img) return false;
 		unsigned index = layers.size();
@@ -142,7 +129,7 @@ namespace Pitri
 		ownership[index] = new_operator;
 		return true;
 	}
-	bool ImageEditor::_RemoveLayer(const unsigned index)
+	bool ImageEditorBase::_RemoveLayer(const unsigned index)
 	{
 		if (index >= layers.size()) return false;
 		if (layers[index] && ownership[index])
@@ -155,7 +142,7 @@ namespace Pitri
 		ownership.erase(ownership.begin() + index);
 		return true;
 	}
-	bool ImageEditor::_RemoveLayers(const unsigned begin, const unsigned end)
+	bool ImageEditorBase::_RemoveLayers(const unsigned begin, const unsigned end)
 	{
 		unsigned a = begin, b = end;
 		if (!AdjustBorders(a, b))
@@ -172,7 +159,7 @@ namespace Pitri
 		ownership.erase(ownership.begin() + a, ownership.begin() + b + 1);
 		return true;
 	}
-	bool ImageEditor::_ClearInvalidLayers()
+	bool ImageEditorBase::_ClearInvalidLayers()
 	{
 		bool success = false;
 		for (int i = layers.size() - 1; i >= 0; --i)
@@ -183,22 +170,22 @@ namespace Pitri
 		return success;
 	}
 
-	Image *ImageEditor::_GetLayer(const unsigned index) const
+	Image *ImageEditorBase::_GetLayer(const unsigned index) const
 	{
 		if (index == -1) return layers[layers.size() - 1];
 		if (index >= layers.size()) return 0;
 		return layers[index];
 	}
-	std::vector<Image *> ImageEditor::_GetLayers() const
+	std::vector<Image *> ImageEditorBase::_GetLayers() const
 	{
 		return layers;
 	}
-	unsigned ImageEditor::_GetLayerCount() const
+	unsigned ImageEditorBase::_GetLayerCount() const
 	{
 		return layers.size();
 	}
 
-	bool ImageEditor::_SwapLayers(unsigned from, unsigned to)
+	bool ImageEditorBase::_SwapLayers(unsigned from, unsigned to)
 	{
 		if (from >= layers.size() || to >= layers.size())
 			return false;
@@ -206,7 +193,7 @@ namespace Pitri
 		layers[to] = layers[from];
 		layers[to] = buffer;
 	}
-	bool ImageEditor::_MergeLayers(const bool remove, unsigned from, unsigned to)
+	bool ImageEditorBase::_MergeLayers(const bool remove, unsigned from, unsigned to)
 	{
 		if (!layers.size() || !AdjustBorders(from, to) || from == to)
 			return false;
@@ -263,9 +250,28 @@ namespace Pitri
 		}
 		return true;
 	}
-	bool ImageEditor::_CollapseLayers(const bool remove)
+	bool ImageEditorBase::_CollapseLayers(const bool remove)
 	{
 		return _MergeLayers(remove, 0, layers.size() - 1);
+	}
+
+	/*-- ImageEditor --*/
+
+	std::map<std::string, actionfunc> ImageEditor::GetActions()
+	{
+		std::map<std::string, actionfunc> actions;
+		actions["FillRect"] = ImageEditor::Action_FillRect;
+		actions["Resize"] = ImageEditor::Action_Resize;
+		actions["ResizeCanvas"] = ImageEditor::Action_ResizeCanvas;
+		actions["RoundCorners"] = ImageEditor::Action_RoundCorners;
+		actions["ShiftImage"] = ImageEditor::Action_ShiftImage;
+		actions["TileImage"] = ImageEditor::Action_TileImage;
+		return actions;
+	}
+	bool ImageEditor::HasAction(const std::string &key)
+	{
+		auto map = GetActions();
+		return map.find(key) != map.end();
 	}
 
 	bool ImageEditor::PerformLayerAction(const std::string &name, ImageAction &data, unsigned begin, unsigned end)
@@ -647,8 +653,50 @@ namespace Pitri
 		if (!data.Valid(2))
 			return false;
 
-		//...
+		unsigned width = data.GetVal(0, img.Width());
+		unsigned height = data.GetVal(1, img.Height());
+
+		if (!width || !height)
+			return false;
+
+		//differences and shift
+		int wdtdiff = static_cast<int>(width) - img.Width();
+		int hgtdiff = static_cast<int>(height) - img.Height();
+		int xshift = data.GetVal(2, wdtdiff / 2);
+		int yshift = data.GetVal(3, hgtdiff / 2);
+
+		Image result(width, height);
+		for (int y = 0; y < result.Height(); ++y)
+		{
+			int ypos = y - yshift - hgtdiff/2;
+			for (int x = 0; x < result.Width(); ++x)
+			{
+				int xpos = x - xshift - wdtdiff/2;
+				if (img.Inside(xpos, ypos))
+					result.Pixel(x, y) = img.Pixel(xpos, ypos);
+			}
+		}
+		img = result;
 		return true;
+	}
+
+	bool ImageEditor::AutoCrop(Image &img)
+	{
+		ImageAction action;
+		return Action_AutoCrop(action, img);
+	}
+	bool ImageEditor::Action_AutoCrop(const ImageAction &data, Image &img)
+	{
+		auto rect = img.GetContentArea();
+		if (rect.size() < 4)
+			return false;
+
+		ImageAction action;
+		action.SetVal(0, rect[2]);
+		action.SetVal(1, rect[3]);
+		action.SetVal(2, (img.Width() - rect[2])/2 - rect[0]);
+		action.SetVal(3, (img.Height() - rect[3])/2 - rect[1]);
+		return Action_ResizeCanvas(action, img);
 	}
 
 	bool ImageEditor::ShiftImage(Image &img, const int x, const int y, const bool percent)
@@ -697,6 +745,31 @@ namespace Pitri
 			}
 		}
 		img = result;
+		return true;
+	}
+
+	/* Lines */
+
+	bool ImageEditor::SubAction_Bezier(const ImageAction &data, Image &img)
+	{
+		return true;
+	}
+
+	bool ImageEditor::DrawLine(Image &img, const unsigned x1, const unsigned y1, const unsigned x2, const unsigned y2, float strength)
+	{
+		return true;
+	}
+	bool ImageEditor::Action_DrawLine(const ImageAction &data, Image &img)
+	{
+		return true;
+	}
+
+	bool ImageEditor::DrawBezier(Image &img, const std::vector<int> &coordinates, float strength)
+	{
+		return true;
+	}
+	bool ImageEditor::Action_DrawBezier(const ImageAction &data, Image &img)
+	{
 		return true;
 	}
 
@@ -793,40 +866,4 @@ namespace Pitri
 		return true;
 	}
 
-
-
-
-	/* Color functions */
-
-	bool ChangeColorLighting(Color &clr, const unsigned char light, const bool brighten)
-	{
-		if (brighten && light == 0 || !brighten && light == 255)
-			return false;
-
-		unsigned char *c = &clr.r;
-		for (unsigned i = 0; i < 3; ++i)
-		{
-			if (!brighten)
-				*c++ = *c * light / 255;
-			else
-			{
-				*c++ = 255 - (255 - light) * (255 - *c) / 255;
-			}
-		}
-		return true;
-	}
-	bool ChangeColorLighting(Color &clr, float light)
-	{
-		if (!light) return false;
-		if (light < -1) light = -1;
-		else if (light > 1) light = 1;
-
-		unsigned char *c = &clr.r;
-		for (unsigned i = 0; i < 3; ++i)
-		{
-			if (light < 0) *c++ *= light + 1;
-			else *c++ = 255 - (255 * (1 - light)) * (255 - *c) / 255;
-		}
-		return true;
-	}
 }

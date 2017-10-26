@@ -43,39 +43,16 @@ namespace Pitri
 
 	typedef bool(*actionfunc)(const ImageAction &, Image &);
 
-	class ImageEditor
+	class ImageEditorBase
 	{
-		private: 
+		protected:
+			bool AdjustBorders(unsigned &begin, unsigned &end) const;
+
 			std::vector<Image *> layers;
 			std::vector<bool> ownership;
 
-		private:
-			bool AdjustBorders(unsigned &begin, unsigned &end) const;
-			static std::map<std::string, actionfunc> GetActions();
-			static bool HasAction(const std::string &key);
-
-			/* Actions and Sub Actions */
-
-			static bool Action_RoundCorners(const ImageAction &data, Image &img);
-
-			static bool SubAction_SquashX(const ImageAction &data, Image &img);
-			static bool SubAction_SquashY(const ImageAction &data, Image &img);
-			static bool SubAction_SquashXY(const ImageAction &data, Image &img);
-			static bool SubAction_StretchX(const ImageAction &data, Image &img);
-			static bool SubAction_StretchY(const ImageAction &data, Image &img);
-			static bool SubAction_StretchXY(const ImageAction &data, Image &img);
-			static bool Action_Resize(const ImageAction &data, Image &img);
-
-			static bool Action_ResizeCanvas(const ImageAction &data, Image &img);
-
-			static bool Action_ShiftImage(const ImageAction &data, Image &img);
-
-			static bool Action_FillRect(const ImageAction &data, Image &img);
-
-			static bool Action_TileImage(const ImageAction &data, Image &img);
-
 		public:
-			~ImageEditor();
+			~ImageEditorBase();
 
 			std::vector<Image *>::iterator begin();
 			std::vector<Image *>::iterator end();
@@ -94,7 +71,38 @@ namespace Pitri
 			bool _SwapLayers(unsigned from, unsigned to);
 			bool _MergeLayers(const bool remove = true, unsigned from = 0, unsigned to = -1);
 			bool _CollapseLayers(const bool remove = true);
+	};
 
+	class ImageEditor : public ImageEditorBase
+	{
+		protected:
+			static std::map<std::string, actionfunc> GetActions();
+			static bool HasAction(const std::string &key);
+
+			static bool Action_RoundCorners(const ImageAction &data, Image &img);
+
+			static bool SubAction_SquashX(const ImageAction &data, Image &img);
+			static bool SubAction_SquashY(const ImageAction &data, Image &img);
+			static bool SubAction_SquashXY(const ImageAction &data, Image &img);
+			static bool SubAction_StretchX(const ImageAction &data, Image &img);
+			static bool SubAction_StretchY(const ImageAction &data, Image &img);
+			static bool SubAction_StretchXY(const ImageAction &data, Image &img);
+			static bool Action_Resize(const ImageAction &data, Image &img);
+
+			static bool Action_ResizeCanvas(const ImageAction &data, Image &img);
+			static bool Action_AutoCrop(const ImageAction &data, Image &img);
+
+			static bool Action_ShiftImage(const ImageAction &data, Image &img);
+
+			static bool SubAction_Bezier(const ImageAction &data, Image &img);
+			static bool Action_DrawLine(const ImageAction &data, Image &img);
+			static bool Action_DrawBezier(const ImageAction &data, Image &img);
+
+			static bool Action_FillRect(const ImageAction &data, Image &img);
+
+			static bool Action_TileImage(const ImageAction &data, Image &img);
+
+		public:
 			bool PerformLayerAction(const std::string &name, ImageAction &data, unsigned begin = 0, unsigned end = -1);
 			static bool PerformLayerAction(const std::string &name, ImageAction &data, Image &img);
 
@@ -112,16 +120,30 @@ namespace Pitri
 			static bool Resize(Image &img, const unsigned width, const unsigned height = 0, const bool percent = false);
 
 			/*ResizeCanvas() gives the Canvas a new size without resizing its contents.
+			- img: Reference to the image.
 			- width, height: New image size.
 			- x, y: Relative new position. 0% = centered, +-100% = aligned on the border, if percentage is used.
 			- percent: Percentage values, if true.*/
 			static bool ResizeCanvas(Image &img, const unsigned width, const unsigned height, const int x, const int y, bool percent = false);
+
+			/*AutoCrop() automatically gets rid of all the empty space around the image.
+			- img: Reference to the image.*/
+			static bool AutoCrop(Image &img);
 
 			/*ShiftImage() Shifts the contents of the image.
 			- x: Relative horizontal difference.
 			- y: Relative vertical difference.
 			- percent: Percentage values, if true.*/
 			static bool ShiftImage(Image &img, const int x, const int y, const bool percent = false);
+
+			/*DrawLine() draws a line from (x1, y1) to (x2, y2).
+			- x1, x2: Start coordinates.
+			- x2, y2: End coordinates.
+			- strength: Line thickness in pixels.*/
+			static bool DrawLine(Image &img, const unsigned x1, const unsigned y1, const unsigned x2, const unsigned y2, float strength);
+
+			/*DrawBezier() draws a bezier curve.*/
+			static bool DrawBezier(Image &img, const std::vector<int> &coordinates, float strength);
 
 			/*FillRect() fills a rectangle of the image with the chosen color. Default is the whole image.
 			- img: Reference to the image.
@@ -137,9 +159,4 @@ namespace Pitri
 			- overlay: If true, the source will be an overlay over the original file instead overwriting it.*/
 			static bool TileImage(Image &img, const Image &source, const bool overlay = false);
 	};
-
-	/* Color functions */
-
-	bool ChangeColorLighting(Color &clr, const unsigned char light, const bool brighten);
-	bool ChangeColorLighting(Color &clr, float light);
 }

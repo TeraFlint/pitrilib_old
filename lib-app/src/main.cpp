@@ -2,11 +2,6 @@
 
 #include "pitri.h"
 
-namespace Pitri
-{
-
-}
-
 std::string Description()
 {
 	return "This is the test application for Pitri's C++ library.";
@@ -59,52 +54,14 @@ int main(int argc, char **argv)
 		std::cout << "Fail!";
 	std::cout << std::endl << std::endl;
 
-	std::vector<std::string> users = Pitri::GetUserList();
-	for (auto dirname : users)
 	{
-		Pitri::UserProfile user(dirname);
-		if (user.Load())
-		{
-			std::string name = dirname;
-			auto userdata = user.GetKeyValue("name");
-			if (!userdata.contents.empty())
-				name = userdata.contents[0];
-
-			if (user.HasFlag())
-			{
-				std::cout << "Transforming flag of " << name << "... ";
-				Pitri::Image origin = user.GetFlag(), transform(size, size);
-				float factor = 1.2;
-				float frequency = 6.24, amplitude = 0.05;
-
-				unsigned frames = 20;
-
-				for (unsigned i = 0; i < frames; ++i)
-				{
-					Pitri::Color *px = &transform.Pixel(0, 0);
-					float phase = static_cast<float>(i) / frames;
-					for (int y = 0; y < transform.Height(); ++y)
-					{
-						for (int x = 0; x < transform.Width(); ++x)
-						{
-							float dx = (static_cast<float>(x) / size - 0.5) * factor, dy = (static_cast<float>(y) / size - 0.5) * factor;
-							float xpos = -amplitude * cos(frequency * dy);
-							float ypos = -amplitude * sin(frequency * (dx - phase)) * (dx / factor + 0.5);
-
-							//derivation of xpos
-							float light = 0.5 * (cos(frequency * (dx - phase)) + 1) * (dx / factor + 0.5) - 0.25;
-
-							Pitri::Color result = origin.InterpolatePixelColor(dx + xpos + 0.5, dy + ypos + 0.5);
-							Pitri::ChangeColorLighting(result, light);
-							*px++ = result;
-						}
-					}
-					transform.Save("frame-" + dirname + "-" +  std::to_string(i) + ".png");
-				}
-				std::cout << "Success!" << std::endl << std::endl;
-			}
-		}
+		Pitri::Image copy = circle;
+		Pitri::ImageEditor::ResizeCanvas(copy, 150, 150, 120, -80, true);
+		copy.Save("shifted-circle.png");
+		Pitri::ImageEditor::AutoCrop(copy);
+		copy.Save("cropped-circle.png");
 	}
+
 	std::cin.get();
 	return 0;
 }

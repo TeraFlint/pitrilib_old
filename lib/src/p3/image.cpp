@@ -261,6 +261,42 @@ namespace Pitri
 		return x < width && y < height;
 	}
 
+	std::vector<unsigned> Image::GetContentArea() const
+	{
+		unsigned x = 0, y = 0, w = 0, h = 0;
+		if (!GetContentArea(x, y, w, h))
+			return {};
+		return { x, y, w, h };
+	}
+
+	bool Image::GetContentArea(unsigned &xpos, unsigned &ypos, unsigned &wdt, unsigned &hgt) const
+	{
+		const Color *px = &bitmap[0];
+		unsigned x1 = -1, x2 = -1, y1 = -1, y2 = -1;
+		for (unsigned y = 0; y < height; ++y)
+		{
+			for (unsigned x = 0; x < width; ++x)
+			{
+				if (!(px++->a))
+					continue;
+
+				if (y1 == -1) y1 = y;
+				y2 = y;
+				if (x1 == -1 || x < x1) x1 = x;
+				if (x2 == -1 || x > x2) x2 = x;
+			}
+		}
+
+		if (x1 == -1 || x2 == -1 || y1 == -1 || y2 == -1)
+			return false;
+
+		xpos = x1;
+		ypos = y1;
+		wdt = x2 - x1 + 1;
+		hgt = y2 - y1 + 1;
+		return true;
+	}
+
 	Color Image::InterpolatePixelColor(float x, float y, const bool relative) const
 	{
 		Color empty(0, 0, 0, 0);
@@ -286,39 +322,86 @@ namespace Pitri
 		if (Inside(x1, y2)) clr3 = Pixel(x1, y2);
 		if (Inside(x2, y2)) clr4 = Pixel(x2, y2);
 
-		Color top, btm, result;
 
-		//top merge
-		if (!clr1.a) clr1 = Color(clr2.r, clr2.g, clr2.b, 0);
-		if (!clr2.a) clr2 = Color(clr1.r, clr1.g, clr1.b, 0);
-		for (unsigned i = 0; i < 4; ++i)
-		{
-			unsigned char *c1 = &clr1.r + i, *c2 = &clr2.r + i, *dst = &top.r + i;
-			*dst = (1 - xoff) * (*c1) + (xoff)* (*c2);
-		}
-
-		//bottom merge
-		if (!clr3.a) clr3 = Color(clr4.r, clr4.g, clr4.b, 0);
-		if (!clr4.a) clr4 = Color(clr3.r, clr3.g, clr3.b, 0);
-		for (unsigned i = 0; i < 4; ++i)
-		{
-			unsigned char *c1 = &clr3.r + i, *c2 = &clr4.r + i, *dst = &btm.r + i;
-			*dst = (1 - xoff) * (*c1) + (xoff)* (*c2);
-		}
-
-		//main merge
-		if (!top.a) top = Color(btm.r, btm.g, btm.b, 0);
-		if (!btm.a) btm = Color(top.r, top.g, top.b, 0);
-		for (unsigned i = 0; i < 4; ++i)
-		{
-			unsigned char *c1 = &top.r + i, *c2 = &btm.r + i, *dst = &result.r + i;
-			*dst = (1 - yoff) * (*c1) + (yoff)* (*c2);
-		}
-		return result;
+		Color top = ColorTransition(clr1, clr2, xoff);
+		Color btm = ColorTransition(clr3, clr4, xoff);;
+		return ColorTransition(top, btm, yoff);
 
 		//Without alpha correction:
 		//*dst = (1 - yoff) * ((1 - xoff) * (*c1) + (xoff)* (*c2)) + (yoff)* ((1 - xoff) * (*c3) + (xoff)* (*c4));
 	}
+
+
+	/* Color functions */
+
+	bool ChangeColorLighting(Color &clr, const unsigned char light, const bool brighten)
+	{
+		if (brighten && light == 0 || !brighten && light == 255)
+			return false;
+
+		unsigned char *c = &clr.r;
+		for (unsigned i = 0; i < 3; ++i)
+		{
+			if (!brighten)
+				*c++ = *c * light / 255;
+			else
+			{
+				*c++ = 255 - (255 - light) * (255 - *c) / 255;
+			}
+		}
+		return true;
+	}
+	bool ChangeColorLighting(Color &clr, float light)
+	{
+		if (!light) return false;
+		if (light < -1) light = -1;
+		else if (light > 1) light = 1;
+
+		unsigned char *c = &clr.r;
+		for (unsigned i = 0; i < 3; ++i)
+		{
+			if (light < 0) *c++ *= light + 1;
+			else *c++ = 255 - (255 * (1 - light)) * (255 - *c) / 255;
+		}
+		return true;
+	}
+
+	Color ColorTransition(Color a, Color b, const unsigned char progress)
+	{
+		Color c(0, 0, 0, 0);
+		if (a.a || a.b)
+		{
+			if (!a.a) a = Color(b.r, b.g, b.b, 0);
+			if (!b.a) b = Color(a.r, a.g, a.b, 0);
+
+			unsigned char *pa = &a.r, *pb = &b.r, *pc = &c.r;
+			for (unsigned i = 0; i < 4; ++i)
+			{
+				*pc++ = static_cast<int>(255 - progress) * (*pa++) / 255 + static_cast<int>(progress)* (*pb++) / 255;
+			}
+		}
+		return c;
+	}
+	Color ColorTransition(Color a, Color b, float progress)
+	{
+		Color c(0, 0, 0, 0);
+		if (a.a || a.b)
+		{
+			if (!a.a) a = Color(b.r, b.g, b.b, 0);
+			if (!b.a) b = Color(a.r, a.g, a.b, 0);
+
+			if (progress < 0) progress = 0;
+			else if (progress > 1) progress = 1;
+
+			unsigned char *pa = &a.r, *pb = &b.r, *pc = &c.r;
+			for (unsigned i = 0; i < 4; ++i)
+			{
+				*pc++ = (1 - progress) * (*pa++) + (progress)* (*pb++);
+			}
+		}
+		return c;
+	}
+
 
 	/*Initialize helper for the WIC library.
 	Don't mind it, it does its own thing automatically.*/

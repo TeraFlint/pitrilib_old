@@ -42,6 +42,9 @@
     <ClInclude Include="src\pitri.h">
       <Filter>Headerdateien</Filter>
     </ClInclude>
+    <ClInclude Include="src\p3\helpers.h">
+      <Filter>Headerdateien</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\p3\filemanip.cpp">
@@ -60,6 +63,9 @@
       <Filter>Quelldateien</Filter>
     </ClCompile>
     <ClCompile Include="src\p3\userprofile.cpp">
+      <Filter>Quelldateien</Filter>
+    </ClCompile>
+    <ClCompile Include="src\p3\helpers.cpp">
       <Filter>Quelldateien</Filter>
     </ClCompile>
   </ItemGroup>
