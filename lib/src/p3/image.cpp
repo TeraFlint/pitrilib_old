@@ -12,9 +12,26 @@
 
 namespace Pitri
 {
+	Color::Color(unsigned clr)
+	{
+		a = 255 - (255 & (clr >> 24));
+		r = 255 & (clr >> 16);
+		g = 255 & (clr >> 8);
+		b = 255 & (clr);
+	}
 	Color::Color(unsigned char r, unsigned char g, unsigned char b, unsigned char a) : r(r), g(g), b(b), a(a)
 	{
 	}
+
+	Color::operator bool()
+	{
+		return a;
+	}
+	Color::operator unsigned()
+	{
+		return ((255 - a) << 24) | (r << 16) | (g << 8) | b;
+	}
+
 
 	bool Color::operator == (const Color &other) const
 	{
@@ -31,6 +48,18 @@ namespace Pitri
 		if (index == 1) return g;
 		if (index == 2) return b;
 		return a;
+	}
+	unsigned char Color::operator[](const unsigned index) const
+	{
+		if (index == 0) return r;
+		if (index == 1) return g;
+		if (index == 2) return b;
+		return a;
+	}
+
+	Color Color::Transparent()
+	{
+		return Color(0, 0, 0, 0);
 	}
 }
 
@@ -102,7 +131,7 @@ namespace Pitri
 		for (auto c : filename)
 			dest += wchar_t(c);
 
-#if defined(CLSID_WICImagingFactory)
+		#if defined(CLSID_WICImagingFactory)
 		if (S_OK != CoCreateInstance(CLSID_WICImagingFactory, 0, CLSCTX_INPROC_SERVER, __uuidof(factory), reinterpret_cast<void **>(&factory)))
 		{
 			if (S_OK != CoCreateInstance(CLSID_WICImagingFactory1, 0, CLSCTX_INPROC_SERVER, __uuidof(factory), reinterpret_cast<void **>(&factory)))
@@ -111,13 +140,13 @@ namespace Pitri
 				return false;
 			}
 		}
-#else
+		#else
 		if (S_OK != CoCreateInstance(CLSID_WICImagingFactory, 0, CLSCTX_INPROC_SERVER, __uuidof(factory), reinterpret_cast<void **>(&factory)))
 		{
 			error = 200;
 			return false;
 		}
-#endif
+		#endif
 		if (S_OK != factory->CreateEncoder(GUID_ContainerFormatPng, 0, &encoder))
 		{
 			error = 201;
@@ -261,12 +290,12 @@ namespace Pitri
 		return x < width && y < height;
 	}
 
-	std::vector<unsigned> Image::GetContentArea() const
+	Rect<int> Image::GetContentArea() const
+	//std::vector<unsigned> Image::GetContentArea() const
 	{
 		unsigned x = 0, y = 0, w = 0, h = 0;
-		if (!GetContentArea(x, y, w, h))
-			return {};
-		return { x, y, w, h };
+		GetContentArea(x, y, w, h);
+		return Rect<int>(x, y, w, h);
 	}
 
 	bool Image::GetContentArea(unsigned &xpos, unsigned &ypos, unsigned &wdt, unsigned &hgt) const
@@ -308,7 +337,7 @@ namespace Pitri
 			y *= (height-1);
 		}
 
-		int xgrid = static_cast<int>(x + 2) - 2, ygrid = static_cast<int>(y + 2) - 2;
+		int xgrid = static_cast<int>(x + 1) - 1, ygrid = static_cast<int>(y + 1) - 1;
 		float xoff = x - xgrid, yoff = y - ygrid;
 
 		int x1 = xgrid, x2 = xgrid + 1;
@@ -324,7 +353,7 @@ namespace Pitri
 
 
 		Color top = ColorTransition(clr1, clr2, xoff);
-		Color btm = ColorTransition(clr3, clr4, xoff);;
+		Color btm = ColorTransition(clr3, clr4, xoff);
 		return ColorTransition(top, btm, yoff);
 
 		//Without alpha correction:
@@ -368,7 +397,7 @@ namespace Pitri
 
 	Color ColorTransition(Color a, Color b, const unsigned char progress)
 	{
-		Color c(0, 0, 0, 0);
+		Color c = Color::Transparent();
 		if (a.a || a.b)
 		{
 			if (!a.a) a = Color(b.r, b.g, b.b, 0);
@@ -384,11 +413,11 @@ namespace Pitri
 	}
 	Color ColorTransition(Color a, Color b, float progress)
 	{
-		Color c(0, 0, 0, 0);
-		if (a.a || a.b)
+		Color c(255, 255, 255, 0);
+		if (a || b)
 		{
-			if (!a.a) a = Color(b.r, b.g, b.b, 0);
-			if (!b.a) b = Color(a.r, a.g, a.b, 0);
+			if (!a) a = Color(b.r, b.g, b.b, 0);
+			if (!b) b = Color(a.r, a.g, a.b, 0);
 
 			if (progress < 0) progress = 0;
 			else if (progress > 1) progress = 1;

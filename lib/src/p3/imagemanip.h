@@ -129,6 +129,7 @@ namespace Pitri
 			/*AutoCrop() automatically gets rid of all the empty space around the image.
 			- img: Reference to the image.*/
 			static bool AutoCrop(Image &img);
+			bool CropLayers(unsigned from = 0, unsigned to = -1);
 
 			/*ShiftImage() Shifts the contents of the image.
 			- x: Relative horizontal difference.
@@ -140,10 +141,10 @@ namespace Pitri
 			- x1, x2: Start coordinates.
 			- x2, y2: End coordinates.
 			- strength: Line thickness in pixels.*/
-			static bool DrawLine(Image &img, const unsigned x1, const unsigned y1, const unsigned x2, const unsigned y2, float strength);
+			static bool DrawLine(Image &img, const Color &clr, float strength, const unsigned x1, const unsigned y1, const unsigned x2, const unsigned y2, bool percent = false);
 
 			/*DrawBezier() draws a bezier curve.*/
-			static bool DrawBezier(Image &img, const std::vector<int> &coordinates, float strength);
+			static bool DrawBezier(Image &img, const Color &clr, float strength, const std::vector<int> &coordinates, bool percent = false);
 
 			/*FillRect() fills a rectangle of the image with the chosen color. Default is the whole image.
 			- img: Reference to the image.

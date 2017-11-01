@@ -205,11 +205,7 @@ namespace Pitri
 		if (!CONFIG_PATH.empty())
 			return CONFIG_PATH + file;
 
-#if defined(P3_CONFIG_DIR)
-		std::string folder = P3_CONFIG_DIR;
-#else
 		std::string folder = "pitrisoftware";
-#endif
 		std::string result = GetSimpleFileValue("configpath", "path");
 		if (!result.empty())
 		{

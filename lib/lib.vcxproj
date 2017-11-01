@@ -131,7 +131,6 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\p3\filemanip.cpp" />
-    <ClCompile Include="src\p3\helpers.cpp" />
     <ClCompile Include="src\p3\image.cpp" />
     <ClCompile Include="src\p3\imagemanip.cpp" />
     <ClCompile Include="src\p3\parameters.cpp" />

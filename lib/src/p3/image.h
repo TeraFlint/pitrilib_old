@@ -9,11 +9,18 @@ namespace Pitri
 	struct Color
 	{
 		Color() = default;
+		Color(unsigned clr);
 		Color(unsigned char r, unsigned char g, unsigned char b, unsigned char a = 255);
+
+		explicit operator bool();
+		operator unsigned();
 
 		bool operator == (const Color &other) const;
 		bool operator != (const Color &other) const;
 		unsigned char &operator[](const unsigned index);
+		unsigned char operator[](const unsigned index) const;
+
+		static Color Transparent();
 
 		unsigned char r, g, b, a;
 	};
@@ -70,7 +77,8 @@ namespace Pitri
 
 		/*GetContentArea() returns the smallest rectangle that contains all the visible content.
 		The vector contains { x, y, width, height } or nothing, if nothing is visible.*/
-		std::vector<unsigned> GetContentArea() const;
+		Rect<int> GetContentArea() const;
+		//std::vector<unsigned> GetContentArea() const;
 
 		/*GetContentArea() gives you the smallest rectangle that contains all the visible content.
 		Returns false and does not change the values, if nothing is visible.

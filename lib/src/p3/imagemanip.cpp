@@ -472,60 +472,6 @@ namespace Pitri
 		}
 		img = result;
 		return true;
-
-		/*
-		if (!data.Valid(1))
-			return false;
-
-		unsigned width = data.GetVal(0, img.Width());
-		unsigned height = data.GetVal(1, img.Height());
-
-		if (!width && !height)
-			return false;
-
-		if (!height)
-			height = img.Height() * width / img.Width();
-		if (!width)
-			width = img.Width() * height / img.Height();
-
-		Image result(width, height);
-		for (unsigned y = 0; y < result.Height(); ++y)
-		{
-			for (unsigned x = 0; x < result.Width(); ++x)
-			{
-				auto &p = result.Pixel(x, y);
-				int r = 0, g = 0, b = 0, a = 0, pxs = 0;
-				float clrpxs = 0;
-
-				for (unsigned y2 = y*img.Height() / result.Height(); y2 < (y + 1)*img.Height() / result.Height(); ++y2)
-				{
-					for (unsigned x2 = x*img.Width() / result.Width(); x2 < (x + 1)*img.Width() / result.Width(); ++x2)
-					{
-						auto &p2 = img.Pixel(x2, y2);
-						pxs++;
-						a += p2.a;
-						if (p2.a)
-						{
-							r += p2.r * p2.a / 255;
-							g += p2.g * p2.a / 255;
-							b += p2.b * p2.a / 255;
-							clrpxs += (float)p2.a / 255;
-						}
-					}
-				}
-
-				if (clrpxs)
-				{
-					p.r = r / clrpxs;
-					p.g = g / clrpxs;
-					p.b = b / clrpxs;
-					p.a = a / pxs;
-				}
-			}
-		}
-		img = result;
-		return true;
-		*/
 	}
 	bool ImageEditor::SubAction_StretchX(const ImageAction &data, Image &img)
 	{
@@ -553,18 +499,18 @@ namespace Pitri
 		unsigned width = img.Width();
 		unsigned height = data.GetVal(1, img.Height());
 
-		/*Image result(width, height);
+		Image result(width, height);
 		Color *dst = &result.Pixel(0, 0), *src;
 		for (unsigned y = 0; y < height; ++y)
 		{
+			float ypos = y * height / img.Height();
 			for (unsigned x = 0; x < width; ++x)
 			{
-				//...
-				++dst;
+				float xpos = x * width / img.Width();
+				*dst++ = img.InterpolatePixelColor(xpos, ypos, false);
 			}
-			//...
 		}
-		img = result;*/
+		img = result;
 		return true;
 	}
 	bool ImageEditor::SubAction_StretchXY(const ImageAction &data, Image &img)
@@ -687,16 +633,50 @@ namespace Pitri
 	}
 	bool ImageEditor::Action_AutoCrop(const ImageAction &data, Image &img)
 	{
-		auto rect = img.GetContentArea();
-		if (rect.size() < 4)
+		Rect<int> rect = img.GetContentArea();
+		if(!rect)
 			return false;
 
 		ImageAction action;
-		action.SetVal(0, rect[2]);
-		action.SetVal(1, rect[3]);
-		action.SetVal(2, (img.Width() - rect[2])/2 - rect[0]);
-		action.SetVal(3, (img.Height() - rect[3])/2 - rect[1]);
+		action.SetVal(0, rect.size.x);
+		action.SetVal(1, rect.size.y);
+		action.SetVal(2, (img.Width() - rect.size.x)/2 - rect.pos.x);
+		action.SetVal(3, (img.Height() - rect.size.y)/2 - rect.pos.y);
 		return Action_ResizeCanvas(action, img);
+	}
+	bool ImageEditor::CropLayers(unsigned from, unsigned to)
+	{
+		AdjustBorders(from, to);
+		Rect<int> area;
+		for (unsigned i = from; i <= to; ++i)
+		{
+			Image *img = layers[i];
+			Rect<int> content = img->GetContentArea();
+			if (area)
+			{
+				area |= content;
+				if (!area)
+					continue;
+			}
+			else
+			{
+				area = content;
+			}
+		}
+		if (!area)
+			return false;
+
+		for (unsigned i = from; i <= to; ++i)
+		{
+			Image *img = layers[i];
+			ImageAction action;
+			action.SetVal(0, area.size.x);
+			action.SetVal(1, area.size.y);
+			action.SetVal(2, (img->Width() - area.size.x) / 2 - area.pos.x);
+			action.SetVal(3, (img->Height() - area.size.y) / 2 - area.pos.y);
+			Action_ResizeCanvas(action, *img);
+		}
+		return true;
 	}
 
 	bool ImageEditor::ShiftImage(Image &img, const int x, const int y, const bool percent)
@@ -755,7 +735,7 @@ namespace Pitri
 		return true;
 	}
 
-	bool ImageEditor::DrawLine(Image &img, const unsigned x1, const unsigned y1, const unsigned x2, const unsigned y2, float strength)
+	bool ImageEditor::DrawLine(Image &img, const Color &clr, float strength, const unsigned x1, const unsigned y1, const unsigned x2, const unsigned y2, bool percent)
 	{
 		return true;
 	}
@@ -764,7 +744,7 @@ namespace Pitri
 		return true;
 	}
 
-	bool ImageEditor::DrawBezier(Image &img, const std::vector<int> &coordinates, float strength)
+	bool ImageEditor::DrawBezier(Image &img, const Color &clr, float strength, const std::vector<int> &coordinates, bool percent)
 	{
 		return true;
 	}
@@ -862,8 +842,6 @@ namespace Pitri
 					src -= other->Width();
 			}
 		}
-
 		return true;
 	}
-
 }

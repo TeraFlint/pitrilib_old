@@ -58,10 +58,11 @@ int main(int argc, char **argv)
 		Pitri::Image copy = circle;
 		Pitri::ImageEditor::ResizeCanvas(copy, 150, 150, 120, -80, true);
 		copy.Save("shifted-circle.png");
+		Pitri::ImageEditor::DrawLine(copy, Pitri::Color(0x63, 0xa5, 0xff), 2, 10, 10, 90, 90, true);
+
 		Pitri::ImageEditor::AutoCrop(copy);
 		copy.Save("cropped-circle.png");
 	}
-
 	std::cin.get();
 	return 0;
 }
