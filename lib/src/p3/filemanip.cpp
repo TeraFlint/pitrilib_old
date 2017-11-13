@@ -147,7 +147,8 @@ namespace Pitri
 			if (!local.empty())
 				local += "\\";
 			local += str;
-			if (!CreateDirectory(local.c_str(), 0))
+
+			if (!CreateDirectory(local.c_str(), 0) && GetLastError() == ERROR_PATH_NOT_FOUND)
 				return false;
 		}
 		return true;

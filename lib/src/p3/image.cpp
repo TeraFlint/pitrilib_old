@@ -271,6 +271,11 @@ namespace Pitri
 	{
 		return height;
 	}
+	Vec2<unsigned> Image::Size() const
+	{
+		return Vec2<unsigned>(width, height);
+	}
+
 	Color &Image::Pixel(unsigned x, unsigned y)
 	{
 		return bitmap[y*width + x];
@@ -291,7 +296,6 @@ namespace Pitri
 	}
 
 	Rect<int> Image::GetContentArea() const
-	//std::vector<unsigned> Image::GetContentArea() const
 	{
 		unsigned x = 0, y = 0, w = 0, h = 0;
 		GetContentArea(x, y, w, h);
@@ -395,6 +399,19 @@ namespace Pitri
 		return true;
 	}
 
+	Color SetColorLighting(const Color &clr, const unsigned char light, const bool brighten)
+	{
+		Color result = clr;
+		ChangeColorLighting(result, light, brighten);
+		return result;
+	}
+	Color SetColorLighting(const Color &clr, float light)
+	{
+		Color result = clr;
+		ChangeColorLighting(result, light);
+		return result;
+	}
+
 	Color ColorTransition(Color a, Color b, const unsigned char progress)
 	{
 		Color c = Color::Transparent();
@@ -404,10 +421,13 @@ namespace Pitri
 			if (!b.a) b = Color(a.r, a.g, a.b, 0);
 
 			unsigned char *pa = &a.r, *pb = &b.r, *pc = &c.r;
-			for (unsigned i = 0; i < 4; ++i)
+			for (unsigned i = 0; i < 3; ++i, ++pa, ++pb, ++pc)
 			{
-				*pc++ = static_cast<int>(255 - progress) * (*pa++) / 255 + static_cast<int>(progress)* (*pb++) / 255;
+				if(*pa != *pb)
+					*pc = sqrt(static_cast<int>(255 - progress) * pow(*pa, 2) / 255 + static_cast<int>(progress) * pow(*pb, 2) / 255);
+				else *pc = *pa;
 			}
+			*pc++ = static_cast<int>(255 - progress) * (*pa++) / 255 + static_cast<int>(progress) * (*pb++) / 255;
 		}
 		return c;
 	}
@@ -423,10 +443,15 @@ namespace Pitri
 			else if (progress > 1) progress = 1;
 
 			unsigned char *pa = &a.r, *pb = &b.r, *pc = &c.r;
-			for (unsigned i = 0; i < 4; ++i)
+			for (unsigned i = 0; i < 3; ++i, ++pa, ++pb, ++pc)
 			{
-				*pc++ = (1 - progress) * (*pa++) + (progress)* (*pb++);
+				//RGB. The square root has to be used unfortunately, or the transition between different light colors will be dark.
+				if (*pa != *pb)
+					*pc = sqrt((1 - progress) * pow(*pa, 2) + (progress)* pow(*pb, 2));
+				else *pc = *pa;
 			}
+			//Alpha. Linear is needed here.
+			*pc++ = (1 - progress) * (*pa++) + (progress)* (*pb++);
 		}
 		return c;
 	}

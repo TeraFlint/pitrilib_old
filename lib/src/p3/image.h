@@ -61,6 +61,9 @@ namespace Pitri
 		unsigned Width() const;
 		/*Height() returns the height of the image.*/
 		unsigned Height() const;
+		/*Size() returns width and height of the image.*/
+		Vec2<unsigned> Size() const;
+
 		/*Pixel() returns a reference to a pixel in the bitmap.
 		- x: X coordinate.
 		- y: Y coordinate.*/
@@ -97,6 +100,9 @@ namespace Pitri
 
 	bool ChangeColorLighting(Color &clr, const unsigned char light, const bool brighten);
 	bool ChangeColorLighting(Color &clr, float light);
+
+	Color SetColorLighting(const Color &clr, const unsigned char light, const bool brighten);
+	Color SetColorLighting(const Color &clr, float light);
 
 	Color ColorTransition(Color a, Color b, const unsigned char progress = 127);
 	Color ColorTransition(Color a, Color b, float progress = 0.5);

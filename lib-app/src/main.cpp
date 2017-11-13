@@ -25,7 +25,7 @@ int main(int argc, char **argv)
 	par.ReturnValue("s", size);
 	const int limit = UCHAR_MAX / 3;
 
-	std::cout << "=== Stuff ===" << std::endl;
+	std::cout << "=== Image test ===" << std::endl;
 	std::cout << "Creating circle.png... ";
 	Pitri::Image circle(size, size);
 	for (unsigned y = 0; y < circle.Height(); ++y)
@@ -46,13 +46,8 @@ int main(int argc, char **argv)
 			px.a = 255;
 		}
 	}
-
 	Pitri::ImageEditor::RoundCorners(circle, 50, true);
-	if (circle.Save("circle.png"))
-		std::cout << "Success!";
-	else
-		std::cout << "Fail!";
-	std::cout << std::endl << std::endl;
+	std::cout << (circle.Save("circle.png") ? "Success" : "Fail") << "!" << std::endl << std::endl;
 
 	{
 		Pitri::Image copy = circle;

@@ -42,6 +42,7 @@
 # Directories
 **/Debug
 **/Release
+**/lib-feature
 
 # Results of the Executable
 *.png

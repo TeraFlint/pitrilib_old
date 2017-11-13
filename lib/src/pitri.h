@@ -10,10 +10,9 @@
 #include "p3/parameters.h"
 
 //stringmanip < filenamip
-//filenanip < userprofile
+#include "p3/filemanip.h"
 
 //compointer < image
 //image < imagemanip
-//imagemanip < userprofile
-
-#include "p3/userprofile.h"
+//imagemanip < user
+#include "p3/user.h"

@@ -1,10 +1,23 @@
 #pragma once
+#include "platform.h"
 #include <iostream>
 
 namespace Pitri
 {
-	/*-- Internal access proxy --*
-	template<class T, unsigned N>
+#if P3_OS == 1 && P3_OS_WINDOWS != 1
+	//System slash
+	const char OS_SLASH = '/';
+#else
+	//System slash
+	const char OS_SLASH = '\\';
+#endif
+}
+
+
+namespace Pitri
+{
+	/*-- Internal access proxy --* /
+	template<typename T, int N, int O = 0>
 	class AccessProxy
 	{
 	private:
@@ -23,10 +36,10 @@ namespace Pitri
 		{
 			return value();
 		}
-	};*/
+	};//*/
 
 	/*-- Vector --*/
-	template<class T, unsigned N>
+	template<typename T, unsigned N>
 	class Vec
 	{
 	protected:
@@ -53,10 +66,10 @@ namespace Pitri
 			}
 		}
 		template <class O>
-		Vec(const Vec<O, N> &other) : Vec()
+		Vec(Vec<O, N> &other) : Vec()
 		{
 			T *dst = &data[0];
-			O *src = &other.data[0];
+			O *src = &other[0];
 			for (unsigned i = 0; i < N; ++i)
 			{
 				*dst++ = static_cast<T>(*src++);
@@ -204,7 +217,7 @@ namespace Pitri
 		}
 	};
 
-	template<class T>
+	template<typename T>
 	class Vec2 : public Vec<T, 2>
 	{
 	public:
@@ -230,7 +243,7 @@ namespace Pitri
 		//AccessProxy<T, 1> y;
 	};
 
-	template<class T>
+	template<typename T>
 	class Vec3 : public Vec<T, 3>
 	{
 	public:
@@ -260,7 +273,7 @@ namespace Pitri
 	};
 
 	/*-- Rect --*/
-	template<class T>
+	template<typename T>
 	class Rect
 	{
 	public:

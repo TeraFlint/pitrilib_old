@@ -36,13 +36,16 @@
     <ClInclude Include="src\p3\stringmanip.h">
       <Filter>Headerdateien</Filter>
     </ClInclude>
-    <ClInclude Include="src\p3\userprofile.h">
-      <Filter>Headerdateien</Filter>
-    </ClInclude>
     <ClInclude Include="src\pitri.h">
       <Filter>Headerdateien</Filter>
     </ClInclude>
     <ClInclude Include="src\p3\helpers.h">
+      <Filter>Headerdateien</Filter>
+    </ClInclude>
+    <ClInclude Include="src\p3\keytracker.h">
+      <Filter>Headerdateien</Filter>
+    </ClInclude>
+    <ClInclude Include="src\p3\user.h">
       <Filter>Headerdateien</Filter>
     </ClInclude>
   </ItemGroup>
@@ -62,7 +65,10 @@
     <ClCompile Include="src\p3\stringmanip.cpp">
       <Filter>Quelldateien</Filter>
     </ClCompile>
-    <ClCompile Include="src\p3\userprofile.cpp">
+    <ClCompile Include="src\p3\keytracker.cpp">
+      <Filter>Quelldateien</Filter>
+    </ClCompile>
+    <ClCompile Include="src\p3\user.cpp">
       <Filter>Quelldateien</Filter>
     </ClCompile>
   </ItemGroup>

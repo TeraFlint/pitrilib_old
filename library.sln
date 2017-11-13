@@ -5,7 +5,9 @@ VisualStudioVersion = 14.0.23107.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "lib-app", "lib-app\lib-app.vcxproj", "{8FF2AA8E-4562-4744-B191-2F4D495D25E5}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "lib", "lib\lib.vcxproj", "{37150294-E29E-47E8-90AF-A1EE5DB9142B}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "pitrilib", "lib\lib.vcxproj", "{37150294-E29E-47E8-90AF-A1EE5DB9142B}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "lib-feature", "lib-feature\lib-feature.vcxproj", "{01F333B7-1A78-497D-AE14-FC80C562496E}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -31,6 +33,14 @@ Global
 		{37150294-E29E-47E8-90AF-A1EE5DB9142B}.Release|x64.Build.0 = Release|x64
 		{37150294-E29E-47E8-90AF-A1EE5DB9142B}.Release|x86.ActiveCfg = Release|Win32
 		{37150294-E29E-47E8-90AF-A1EE5DB9142B}.Release|x86.Build.0 = Release|Win32
+		{01F333B7-1A78-497D-AE14-FC80C562496E}.Debug|x64.ActiveCfg = Debug|x64
+		{01F333B7-1A78-497D-AE14-FC80C562496E}.Debug|x64.Build.0 = Debug|x64
+		{01F333B7-1A78-497D-AE14-FC80C562496E}.Debug|x86.ActiveCfg = Debug|Win32
+		{01F333B7-1A78-497D-AE14-FC80C562496E}.Debug|x86.Build.0 = Debug|Win32
+		{01F333B7-1A78-497D-AE14-FC80C562496E}.Release|x64.ActiveCfg = Release|x64
+		{01F333B7-1A78-497D-AE14-FC80C562496E}.Release|x64.Build.0 = Release|x64
+		{01F333B7-1A78-497D-AE14-FC80C562496E}.Release|x86.ActiveCfg = Release|Win32
+		{01F333B7-1A78-497D-AE14-FC80C562496E}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -22,6 +22,7 @@
     <ProjectGuid>{37150294-E29E-47E8-90AF-A1EE5DB9142B}</ProjectGuid>
     <RootNamespace>lib</RootNamespace>
     <WindowsTargetPlatformVersion>8.1</WindowsTargetPlatformVersion>
+    <ProjectName>pitrilib</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
@@ -96,6 +97,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -123,19 +125,21 @@
     <ClInclude Include="src\p3\helpers.h" />
     <ClInclude Include="src\p3\image.h" />
     <ClInclude Include="src\p3\imagemanip.h" />
+    <ClInclude Include="src\p3\keytracker.h" />
     <ClInclude Include="src\p3\parameters.h" />
+    <ClInclude Include="src\p3\user.h" />
     <ClInclude Include="src\pitri.h" />
     <ClInclude Include="src\p3\platform.h" />
     <ClInclude Include="src\p3\stringmanip.h" />
-    <ClInclude Include="src\p3\userprofile.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\p3\filemanip.cpp" />
     <ClCompile Include="src\p3\image.cpp" />
     <ClCompile Include="src\p3\imagemanip.cpp" />
+    <ClCompile Include="src\p3\keytracker.cpp" />
     <ClCompile Include="src\p3\parameters.cpp" />
     <ClCompile Include="src\p3\stringmanip.cpp" />
-    <ClCompile Include="src\p3\userprofile.cpp" />
+    <ClCompile Include="src\p3\user.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
