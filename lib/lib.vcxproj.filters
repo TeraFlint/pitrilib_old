@@ -48,6 +48,9 @@
     <ClInclude Include="src\p3\user.h">
       <Filter>Headerdateien</Filter>
     </ClInclude>
+    <ClInclude Include="src\p3\application.h">
+      <Filter>Headerdateien</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\p3\filemanip.cpp">
@@ -69,6 +72,9 @@
       <Filter>Quelldateien</Filter>
     </ClCompile>
     <ClCompile Include="src\p3\user.cpp">
+      <Filter>Quelldateien</Filter>
+    </ClCompile>
+    <ClCompile Include="src\p3\application.cpp">
       <Filter>Quelldateien</Filter>
     </ClCompile>
   </ItemGroup>

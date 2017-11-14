@@ -16,3 +16,5 @@
 //image < imagemanip
 //imagemanip < user
 #include "p3/user.h"
+
+#include "p3/application.h"
