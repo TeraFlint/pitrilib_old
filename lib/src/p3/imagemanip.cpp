@@ -274,6 +274,26 @@ namespace Pitri
 		return map.find(key) != map.end();
 	}
 
+	Image ImageEditor::ByteToMonochrome(const Color clr, unsigned width, const std::vector<unsigned char> data)
+	{
+		Image dummy(0, 0);
+		if (!data.size()) return dummy;
+		if (!width) width = sqrt(data.size());
+
+		unsigned height = data.size() / width;
+		if (data.size() % width) height++;
+
+		Image img(width, height);
+		Color *px = &img.Pixel(0, 0);
+		for (auto c : data)
+		{
+			Color local = Pitri::SetColorLighting(clr, static_cast<float>(c & 31) / 15.5 - 1);
+			local.a = ((c >> 5) & 7) * 255 / 7;
+			*px++ = local;
+		}
+		return img;
+	}
+
 	bool ImageEditor::PerformLayerAction(const std::string &name, ImageAction &data, unsigned begin, unsigned end)
 	{
 		if (!AdjustBorders(begin, end))

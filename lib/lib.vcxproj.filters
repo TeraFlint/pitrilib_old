@@ -51,6 +51,12 @@
     <ClInclude Include="src\p3\application.h">
       <Filter>Headerdateien</Filter>
     </ClInclude>
+    <ClInclude Include="src\p3\compression.h">
+      <Filter>Headerdateien</Filter>
+    </ClInclude>
+    <ClInclude Include="src\p3\zip.h">
+      <Filter>Headerdateien</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\p3\filemanip.cpp">
@@ -75,6 +81,12 @@
       <Filter>Quelldateien</Filter>
     </ClCompile>
     <ClCompile Include="src\p3\application.cpp">
+      <Filter>Quelldateien</Filter>
+    </ClCompile>
+    <ClCompile Include="src\p3\compression.cpp">
+      <Filter>Quelldateien</Filter>
+    </ClCompile>
+    <ClCompile Include="src\p3\zip.cpp">
       <Filter>Quelldateien</Filter>
     </ClCompile>
   </ItemGroup>

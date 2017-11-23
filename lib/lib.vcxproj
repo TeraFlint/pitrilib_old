@@ -122,6 +122,7 @@
   <ItemGroup>
     <ClInclude Include="src\p3\application.h" />
     <ClInclude Include="src\p3\compointer.h" />
+    <ClInclude Include="src\p3\compression.h" />
     <ClInclude Include="src\p3\filemanip.h" />
     <ClInclude Include="src\p3\helpers.h" />
     <ClInclude Include="src\p3\image.h" />
@@ -129,12 +130,14 @@
     <ClInclude Include="src\p3\keytracker.h" />
     <ClInclude Include="src\p3\parameters.h" />
     <ClInclude Include="src\p3\user.h" />
+    <ClInclude Include="src\p3\zip.h" />
     <ClInclude Include="src\pitri.h" />
     <ClInclude Include="src\p3\platform.h" />
     <ClInclude Include="src\p3\stringmanip.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\p3\application.cpp" />
+    <ClCompile Include="src\p3\compression.cpp" />
     <ClCompile Include="src\p3\filemanip.cpp" />
     <ClCompile Include="src\p3\image.cpp" />
     <ClCompile Include="src\p3\imagemanip.cpp" />
@@ -142,6 +145,7 @@
     <ClCompile Include="src\p3\parameters.cpp" />
     <ClCompile Include="src\p3\stringmanip.cpp" />
     <ClCompile Include="src\p3\user.cpp" />
+    <ClCompile Include="src\p3\zip.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

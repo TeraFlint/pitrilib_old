@@ -103,6 +103,8 @@ namespace Pitri
 			static bool Action_TileImage(const ImageAction &data, Image &img);
 
 		public:
+			static Image ByteToMonochrome(const Color clr, unsigned width, const std::vector<unsigned char> data);
+
 			bool PerformLayerAction(const std::string &name, ImageAction &data, unsigned begin = 0, unsigned end = -1);
 			static bool PerformLayerAction(const std::string &name, ImageAction &data, Image &img);
 

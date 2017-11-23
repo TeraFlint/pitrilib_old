@@ -1,5 +1,6 @@
 #include "user.h"
 #include "filemanip.h"
+#include "zip.h"
 #include <fstream>
 
 namespace Pitri
@@ -68,13 +69,16 @@ namespace Pitri
 			return false;
 		const std::string src = GetPath(false);
 		const std::string dst = GetPath(true);
+		if (!src.compare(dst))
+			return false;
 
-		//Todo:
-		//Zip. Needs zlib added to the library.
-		//Then delete unpacked files, if successful.
+		if(!ZipFolder(src, dst))
+			return false;
+		zipped = true;
+
+		//Todo: Delete all files in unpacked\user_id.
 		//...
 
-		zipped = true;
 		return true;
 	}
 	bool User::Unzip()
@@ -83,12 +87,14 @@ namespace Pitri
 			return false;
 		const std::string src = GetPath(true);
 		const std::string dst = GetPath(false);
+		if (!src.compare(dst))
+			return false;
 
-		//Todo:
-		//Delete all files in unpacked\user_id.
-		//Then unzip. Needs zlib added to the library.
+		//Todo: Delete all files in unpacked\user_id.
 		//...
 
+		if (!UnzipFolder(src, dst))
+			return false;
 		zipped = false;
 		return true;
 	}

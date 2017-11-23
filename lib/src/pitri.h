@@ -18,3 +18,7 @@
 #include "p3/user.h"
 
 #include "p3/application.h"
+
+#include "p3/compression.h"
+
+#include "p3/zip.h"

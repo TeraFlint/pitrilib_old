@@ -73,4 +73,6 @@ namespace Pitri
 	- to: Path of the destinaiton directory.
 	- no_overwrite: If true, files will fail to paste, if there already exists a file at the destination. */
 	void CopyDirectoryContents(std::string from, std::string to, bool no_overwrite = false);
+
+	std::string RandomTempFolder(std::string label = "", unsigned length = 10);
 }

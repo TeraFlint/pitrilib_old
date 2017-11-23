@@ -1,4 +1,5 @@
 #include "filemanip.h"
+#include "helpers.h"
 
 namespace Pitri
 {
@@ -220,5 +221,22 @@ namespace Pitri
 			CreateDirectoryPath(to + "\\" + dir);
 			CopyDirectoryContents(from + "\\" + dir, to + "\\" + dir);
 		}
+	}
+
+	std::string RandomTempFolder(std::string label, unsigned length)
+	{
+		if (length < 10)
+			length = 10;
+
+		char buffer[MAX_PATH];
+		GetTempPath(MAX_PATH, buffer);
+
+		const std::string space = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ-_";
+		std::string result = buffer + label;
+		for (unsigned i = 0; i < length; ++i)
+		{
+			result += space[rand() % space.size()];
+		}
+		return result + OS_SLASH;
 	}
 }
